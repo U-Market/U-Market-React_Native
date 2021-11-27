@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "460453028112",
+    "firebase_url": "https://u-market-chat-default-rtdb.firebaseio.com",
+    "project_id": "u-market-chat",
+    "storage_bucket": "u-market-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460453028112:android:069033fca2b69fa536c595",
+        "android_client_info": {
+          "package_name": "u.market.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460453028112-bq3uhfq9rio61qabrc6vn1quasltc3fp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmXumtbAHjdF-k9VGgp8g5GlWVtChL-O4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "460453028112-bq3uhfq9rio61qabrc6vn1quasltc3fp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

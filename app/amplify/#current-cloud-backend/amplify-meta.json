@@ -1,0 +1,80 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-schoolbarter-dev-181925-authRole",
+      "UnauthRoleArn": "arn:aws:iam::733877391107:role/amplify-schoolbarter-dev-181925-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::733877391107:role/amplify-schoolbarter-dev-181925-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-schoolbarter-dev-181925-deployment",
+      "UnauthRoleName": "amplify-schoolbarter-dev-181925-unauthRole",
+      "StackName": "amplify-schoolbarter-dev-181925",
+      "StackId": "arn:aws:cloudformation:eu-west-3:733877391107:stack/amplify-schoolbarter-dev-181925/3503eca0-1b86-11ec-a5ea-0e12bb8c7d5a",
+      "AmplifyAppId": "d2l9t5hpt4ot0p"
+    }
+  },
+  "auth": {
+    "schoolbarter0516e493": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "loginMechanisms": [],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-schoolbarter-dev-181925-deployment/amplify-cfn-templates/auth/schoolbarter0516e493-cloudformation-template.yml",
+        "logicalId": "authschoolbarter0516e493"
+      },
+      "lastPushTimeStamp": "2021-09-22T11:54:54.234Z",
+      "output": {
+        "UserPoolId": "eu-west-3_BaPvMZffp",
+        "AppClientIDWeb": "3tnhb9bptjus0ql0nglk93fruc",
+        "AppClientID": "4un6jo83ragcot1ln1sdbildht",
+        "IdentityPoolId": "eu-west-3:f5ae7e6d-4ec9-40ba-8783-8052167ecb67",
+        "UserPoolArn": "arn:aws:cognito-idp:eu-west-3:733877391107:userpool/eu-west-3_BaPvMZffp",
+        "IdentityPoolName": "schoolbarter0516e493_identitypool_0516e493__dev",
+        "UserPoolName": "schoolbarter0516e493_userpool_0516e493"
+      },
+      "lastPushDirHash": "rtjmxX1XH4Qv0hCsw3PG3GtsMeY="
+    }
+  },
+  "api": {
+    "schoolbarter": {
+      "service": "AppSync",
+      "providerPlugin": "awscloudformation",
+      "output": {
+        "authConfig": {
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authschoolbarter0516e493"
+            }
+          },
+          "additionalAuthenticationProviders": []
+        },
+        "GraphQLAPIIdOutput": "njnapoj7tbfcjkrcfzisodsr2u",
+        "GraphQLAPIEndpointOutput": "https://rpob7wr4lbgp5hlg2sjnhjinua.appsync-api.eu-west-3.amazonaws.com/graphql"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-schoolbarter-dev-181925-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apischoolbarter"
+      },
+      "lastPushTimeStamp": "2021-09-22T11:54:56.906Z",
+      "lastPushDirHash": "Gp1/hud6aY9lUewbWqUem34AGZ0="
+    }
+  }
+}
