@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { ThemeContext } from "styled-components/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Main, Community, Market, Profile, ChatListPage } from "../screens";
-import { Ionicons, MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { Image, View } from "react-native";
 
 const Tab = createBottomTabNavigator();
 
 const TabBarHomeIcon = ({ focused }) => {
-  const theme = useContext(ThemeContext);
   return focused ? (
     <View>
       <Image source={require("../icons/tabvar/homeSelect.png")} />
@@ -75,6 +73,7 @@ const MainTab = () => {
   return (
     <Tab.Navigator
       tabBarOptions={{
+        keyboardHidesTabBar: true,
         activeTintColor: theme.tabActiveColor,
         inactiveTintColor: theme.main,
         headerShown: false,
@@ -92,7 +91,7 @@ const MainTab = () => {
         }}
       />
       <Tab.Screen
-        name="커뮤니티"
+        name="Community"
         component={Community}
         options={{
           tabBarIcon: ({ focused }) =>
@@ -102,7 +101,7 @@ const MainTab = () => {
         }}
       />
       <Tab.Screen
-        name="장터"
+        name="Market"
         component={Market}
         options={{
           tabBarIcon: ({ focused }) =>
@@ -122,7 +121,7 @@ const MainTab = () => {
         }}
       />
       <Tab.Screen
-        name="마이페이지"
+        name="Profile"
         component={Profile}
         options={{
           tabBarIcon: ({ focused }) =>

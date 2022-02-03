@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components/native";
 
 import Hot10List from "./Hot10List";
-import t from "../../../../utills/translate/Translator";
+import t from "../../../../utils/translate/Translator";
 
 const Container = styled.View`
   flex: 1;

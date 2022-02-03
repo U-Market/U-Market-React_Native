@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components/native";
-import { Text, Alert, View, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 import ComunitySearchTreeItem from "./ComunitySearchTreeItem";
 
 const Container = styled.SafeAreaView`
@@ -35,7 +35,7 @@ const SeeMore = styled.Text`
 
 function CommunitySearchResult({ navigation, searchList, headerTitle }) {
   const [free, setFree] = useState(free);
-
+  console.log(searchList);
   const showTreeSearchResultFree = () => {
     const spliceList = searchList.free.slice(0, 3);
     const Items = spliceList.map((community) => {
@@ -151,7 +151,7 @@ function CommunitySearchResult({ navigation, searchList, headerTitle }) {
         <SeeMoreContainer
           onPress={() => {
             navigation.navigate("SearchSeeMorePage", {
-              headerTitle: `${t.print("ForFree")} ${headerTitle} `,
+              headerTitle: `${t.print("ForFree")}  `,
               communities: searchList.free,
             });
           }}
@@ -166,7 +166,7 @@ function CommunitySearchResult({ navigation, searchList, headerTitle }) {
         <SeeMoreContainer
           onPress={() => {
             navigation.navigate("SearchSeeMorePage", {
-              headerTitle: `${t.print("ForLivingAlone")} ${headerTitle} `,
+              headerTitle: `${t.print("ForLivingAlone")} `,
               communities: searchList.forAlone,
             });
           }}
@@ -181,7 +181,7 @@ function CommunitySearchResult({ navigation, searchList, headerTitle }) {
         <SeeMoreContainer
           onPress={() => {
             navigation.navigate("SearchSeeMorePage", {
-              headerTitle: `${t.print("ForPromotion")} ${headerTitle} `,
+              headerTitle: `${t.print("ForPromotion")} `,
               communities: searchList.promotion,
             });
           }}
@@ -196,7 +196,7 @@ function CommunitySearchResult({ navigation, searchList, headerTitle }) {
         <SeeMoreContainer
           onPress={() => {
             navigation.navigate("SearchSeeMorePage", {
-              headerTitle: `${t.print("QNA")} ${headerTitle} `,
+              headerTitle: `${t.print("QNA")}`,
               communities: searchList.question,
             });
           }}

@@ -4,9 +4,6 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 
 import { theme } from "../../../theme";
-import t from "../../../utills/translate/Translator";
-
-const Container = styled.Pressable``;
 
 const StyledImage = styled.Image.attrs((props) => ({
   source: props.source,
@@ -71,6 +68,10 @@ const PostDate = styled.Text`
   bottom: 16px;
 `;
 
+const conversionPrice = () => {
+  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 const Item = ({ onPress, imgUrl, itemTitle, price, date, wish }) => {
   return (
     <TouchableOpacity style={styles.shoadowBox} onPress={onPress}>
@@ -80,7 +81,7 @@ const Item = ({ onPress, imgUrl, itemTitle, price, date, wish }) => {
       </DeleteBtn>
       <ItemContent>
         <ItemStauts>판매중</ItemStauts>
-        <ItemPrice>{price}원</ItemPrice>
+        <ItemPrice>{conversionPrice()}원</ItemPrice>
 
         <ItemTitle>{itemTitle}</ItemTitle>
         <RowContainer>

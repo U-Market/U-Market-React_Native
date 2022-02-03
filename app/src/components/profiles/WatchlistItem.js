@@ -4,10 +4,8 @@ import { StyleSheet, TouchableOpacity, Dimensions, Alert } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { theme } from "../../theme";
 import { API_URL } from "@env";
-import { getItemFromAsync } from "../../utills/AsyncStorage";
-import t from "../../utills/translate/Translator";
-
-const Container = styled.Pressable``;
+import { getItemFromAsync } from "../../utils/AsyncStorage";
+import t from "../../utils/translate/Translator";
 
 const StyledImage = styled.Image.attrs((props) => ({
   source: props.source,
@@ -39,15 +37,13 @@ const ItemContent = styled.View`
 const ItemPrice = styled.Text`
   font-size: 18px;
   padding-left: 15px;
-  /* padding-top: 12px; */
   color: ${({ theme }) => theme.text};
   font-weight: bold;
 `;
 
 const ItemStatus = styled.Text`
   font-size: 12px;
-  /* position: absolute;
-  right: 16px; */
+
   padding-left: 25px;
   color: ${({ theme }) => theme.green};
   font-weight: bold;
@@ -69,20 +65,25 @@ const WishContainer = styled.View`
   width: 100%;
 `;
 
-const Item = ({ onPress, imgUrl, itemTitle, price, statusNum, no }) => {
+const Item = ({
+  imgUrl,
+  itemTitle,
+  price,
+  statusNum,
+  no,
+  navigation,
+  setIsLoading,
+}) => {
   const [isDelete, setIsDelete] = useState(false);
 
   const _statusNum = () => {
-    if (statusNum === 1) {
-      return <ItemStatus>{t.print("IsOnSale")}</ItemStatus>;
-    } else if (statusNum === 2) {
+    if (statusNum === 1) return <ItemStatus>{t.print("IsOnSale")}</ItemStatus>;
+    else if (statusNum === 2)
       return <ItemStatus>{t.print("Reservation")}</ItemStatus>;
-    } else {
-      return <ItemStatus>{t.print("SoldOut")}</ItemStatus>;
-    }
+    else return <ItemStatus>{t.print("SoldOut")}</ItemStatus>;
   };
 
-  const _handleDeleteWish = async () => {
+  const deleteWatchlist = async () => {
     const id = await getItemFromAsync("userNo");
     try {
       const config = {
@@ -101,30 +102,38 @@ const Item = ({ onPress, imgUrl, itemTitle, price, statusNum, no }) => {
         (res) => res.json()
       );
       setIsDelete(true);
+      setIsLoading(false);
     } catch (e) {
       Alert.alert("실패", e.message);
-    } finally {
     }
   };
 
-  if (isDelete) {
-    return <></>;
-  }
+  const moveDetailViewPage = () => {
+    navigation.navigate("MarketDetailPage", {
+      productNo: no,
+      headerTitle: itemTitle,
+    });
+  };
+
+  const conversionPrice = () => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   return isDelete ? (
     <></>
   ) : (
-    <TouchableOpacity style={styles.shoadowBox} onPress={onPress}>
+    <TouchableOpacity style={styles.shoadowBox} onPress={moveDetailViewPage}>
       <StyledImage source={{ uri: imgUrl }} />
       <ItemContent>
         <ItemPrice>
-          {price}
+          {conversionPrice()}
           {t.print("Won")}
         </ItemPrice>
         <>{_statusNum()}</>
       </ItemContent>
       <ItemTitle>{itemTitle}</ItemTitle>
       <WishContainer>
-        <Wish onPress={_handleDeleteWish}>
+        <Wish onPress={deleteWatchlist}>
           <FontAwesome name="heart" size={20} color="red" />
         </Wish>
       </WishContainer>

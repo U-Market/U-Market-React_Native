@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
 import { Alert } from "react-native";
 
-import { ReadyContext } from "../../contexts";
 import FilterContainer from "../../components/filter/FilterContainer";
 import Header from "../../components/commons/Header";
 import { Button } from "../../components/index";
@@ -36,28 +35,25 @@ const SchoolSelectPage = ({ navigation }) => {
     setSelectedMajor,
   };
 
-  // useEffect(() => {
-  //   if (selectedMajor.value !== undefined) {
-  //     return setDisabled(false);
-  //   }
-  //   return setDisabled(true);
-  // }, [selectedMajor]);
-
   const _saveMajorToDbByFetch = async () => {
-    const request = {
-      department: selectedDepartment.item,
-      major: selectedMajor.item,
-    };
+    try {
+      const request = {
+        department: selectedDepartment.item,
+        major: selectedMajor.item,
+      };
 
-    const response = await fetch(`${API_URL}/api/pick/major`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify(request),
-    }).then((res) => res.json());
+      const response = await fetch(`${API_URL}/api/pick/major`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(request),
+      }).then((res) => res.json());
 
-    return response?.majorNum;
+      return response?.majorNum;
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const _moveAuthPage = async () => {
@@ -79,14 +75,20 @@ const SchoolSelectPage = ({ navigation }) => {
       selectedFilterData.selectedMajor.value = majorNum;
 
       // 모든 정보를 입력해야만 인증 페이지로 이동
-      navigation.navigate("AuthPage", { selectedFilterData });
+      navigation.replace("AuthPage", { selectedFilterData });
     }
   };
+
+  useEffect(() => {
+    if (selectedMajor.value === undefined) {
+      setDisabled(true);
+    } else return setDisabled(false);
+  }, [selectedMajor]);
 
   return (
     <Container>
       <Header
-        moveViewByNavigation={() => navigation.goBack()}
+        moveViewByNavigation={() => navigation.replace("LoginQuestion")}
         title={"학교인증"}
       />
 

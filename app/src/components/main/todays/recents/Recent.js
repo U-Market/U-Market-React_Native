@@ -1,8 +1,8 @@
-import React, { useContext, useState } from "react";
+import React from "react";
 import styled from "styled-components/native";
 
 import RecentList from "./RecentList";
-import t from "../../../../utills/translate/Translator";
+import t from "../../../../utils/translate/Translator";
 
 const Container = styled.View`
   flex: 1;

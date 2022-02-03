@@ -1,30 +1,41 @@
-import React, { useContext, useEffect, useState, useLayoutEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components/native";
-import { Text, Alert } from "react-native";
-import AppLoding from "expo-app-loading";
+import { Alert, ScrollView, RefreshControl } from "react-native";
 import { API_URL } from "@env";
 import { FlatList } from "react-native-gesture-handler";
 
-import { ReadyContext, ProgressContext } from "../../contexts";
-import { getItemFromAsync } from "../../utills/AsyncStorage";
+import { getItemFromAsync } from "../../utils/AsyncStorage";
 import Header from "../../components/commons/Header";
 
 import ChatList from "../../components/chats/ChatList";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
   background-color: ${({ theme }) => theme.background2};
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
+const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
+
 const ChatListPage = ({ navigation }) => {
   const [chatList, setChatList] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-  const { isReady, readyDispatch } = useContext(ReadyContext);
-  const { spinner } = useContext(ProgressContext);
-  const _loaddatas = async () => {
+  useEffect(() => {
+    _loadData();
+  }, [isReady]);
+
+  const _loadData = async () => {
     try {
-      spinner.start();
       const userNo = await getItemFromAsync("userNo");
       const config = {
         method: "GET",
@@ -40,16 +51,15 @@ const ChatListPage = ({ navigation }) => {
       ).then((res) => res.json());
 
       setChatList(response.chatlist);
-      console.log(response);
+      setIsReady(true);
     } catch (e) {
       Alert.alert("실패", e.message);
-    } finally {
-      spinner.stop();
     }
   };
 
-  useEffect(() => {
-    readyDispatch.notReady();
+  const onRefresh = React.useCallback(() => {
+    setIsReady(false);
+    wait(2000).then(() => setIsReady(true));
   }, []);
 
   return isReady ? (
@@ -58,21 +68,26 @@ const ChatListPage = ({ navigation }) => {
         moveViewByNavigation={() => navigation.goBack()}
         title={t.print("Chat")}
       />
-      <FlatList
-        keyExtractor={(chatList, index) => index.toString()}
-        data={chatList}
-        renderItem={({ item }) => (
-          <ChatList chatList={item} navigation={navigation} />
-        )}
-        windowSize={3} //렌더링 되는양을 조절
-      />
+      <ScrollView
+        style={{ flex: 1, width: "100%" }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <FlatList
+          keyExtractor={(chatList, index) => index.toString()}
+          data={chatList}
+          refreshing={isReady}
+          onRefresh={onRefresh}
+          renderItem={({ item }) => (
+            <ChatList chatList={item} navigation={navigation} />
+          )}
+          windowSize={3}
+        />
+      </ScrollView>
     </Container>
   ) : (
-    <AppLoding
-      startAsync={_loaddatas}
-      onFinish={() => readyDispatch.ready()}
-      onError={console.error}
-    />
+    <ActivityIndicatorContainer />
   );
 };
 

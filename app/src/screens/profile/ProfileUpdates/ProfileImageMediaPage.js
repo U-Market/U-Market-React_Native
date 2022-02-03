@@ -8,10 +8,10 @@ import {
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import { ImageBrowser } from "expo-image-picker-multiple";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 export default class ImageBrowserScreen extends Component {
-  _getHeaderLoader = () => <ActivityIndicator size='small' color={"#0580FF"} />;
+  _getHeaderLoader = () => <ActivityIndicator size="small" color={"#0580FF"} />;
 
   imagesCallback = (callback) => {
     const { navigation } = this.props;

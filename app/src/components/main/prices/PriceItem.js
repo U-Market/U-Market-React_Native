@@ -1,12 +1,11 @@
 import React from "react";
 import styled from "styled-components/native";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 const Container = styled.TouchableOpacity`
-  width: 31%;
-  padding-bottom: 10px;
+  width: 100%;
 `;
 
 const StyledImage = styled.Image.attrs((props) => ({
@@ -24,6 +23,7 @@ const ItemTitle = styled.Text`
   font-size: 14px;
   color: ${({ theme }) => theme.text2};
   font-weight: bold;
+  margin-left: 3px;
 `;
 
 const ItemPrice = styled.Text.attrs(() => ({
@@ -31,7 +31,7 @@ const ItemPrice = styled.Text.attrs(() => ({
 }))`
   font-size: 18px;
   font-weight: bold;
-  margin: 3px 0 0 0px;
+  margin: 3px 0 0 3px;
   color: ${({ theme }) => theme.text};
 `;
 
@@ -47,28 +47,28 @@ const Wish = styled.Text`
   padding: 0px 10px 0px 0px;
 `;
 
-const Item = ({
-  productNo,
-  imgUrl,
-  itemTitle,
-  price,
-  commentCount,
-  wish,
-  navigation,
-}) => {
-  const _handleItemPress = () =>
+const Item = ({ products, navigation }) => {
+  const moveProductDetailPage = () =>
     navigation.navigate("MarketDetailPage", {
-      productNo: productNo,
+      productNo: products.no,
     });
+
+  const conversionPrice = () => {
+    if (products !== undefined)
+      return products?.price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   return (
-    <Container onPress={_handleItemPress}>
-      <StyledImage source={{ uri: imgUrl }}></StyledImage>
+    <Container onPress={moveProductDetailPage}>
+      <StyledImage source={{ uri: products.thumbnail }}></StyledImage>
+
       <ItemContent>
-        <ItemPrice>{`${price} ${t.print("Won")}`}</ItemPrice>
+        <ItemPrice>{`${conversionPrice()} ${t.print("Won")}`}</ItemPrice>
       </ItemContent>
-      <ItemTitle>{itemTitle}</ItemTitle>
+      <ItemTitle>{products.title}</ItemTitle>
+
       <ItemContent>
-        <Wish>{wish}</Wish>
+        <Wish>{products.interestCnt}</Wish>
         <FontAwesome name="heart" size={14} color="pink" />
       </ItemContent>
     </Container>

@@ -4,7 +4,7 @@ import { Image } from "react-native";
 
 import FilterMenuList from "./FilterMenuList";
 import SelectBoxForFilterMenu from "./SelectBoxForFilterMenu";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const SchootlSelectContainer = styled.View`
   width: 100%;

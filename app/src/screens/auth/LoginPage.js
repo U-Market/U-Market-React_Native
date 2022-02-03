@@ -1,9 +1,11 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import styled from "styled-components/native";
+
+import { ScrollView } from "react-native";
 
 import Login from "../../components/auth/Login";
 import Header from "../../components/commons/Header";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -13,10 +15,12 @@ const LoginPage = ({ navigation }) => {
   return (
     <Container>
       <Header
-        moveViewByNavigation={() => navigation.goBack()}
+        moveViewByNavigation={() => navigation.replace("LoginQuestion")}
         title={t.print("Login")}
       />
-      <Login navigation={navigation} />
+      <ScrollView scrollEnabled={false}>
+        <Login navigation={navigation} />
+      </ScrollView>
     </Container>
   );
 };

@@ -1,12 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
-import { Text, Alert, Image, View } from "react-native";
-import AppLoding from "expo-app-loading";
+import { Alert, Image } from "react-native";
 import { API_URL } from "@env";
 import { Feather } from "@expo/vector-icons";
 
-import Header from "../../components/commons/Header";
-import { getItemFromAsync } from "../../utills/AsyncStorage";
+import { getItemFromAsync } from "../../utils/AsyncStorage";
 import ChatScreen from "../../components/chats/ChatScreen";
 
 const Container = styled.SafeAreaView`
@@ -34,10 +32,18 @@ const Title = styled.Text`
   padding-left: 5px;
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
 const ChatScreenPage = ({ navigation, route }) => {
   const [isReady, setIsReady] = useState(false);
   const [chatRoomNo, setChatRoomNo] = useState("");
+  const [chatToken, setChatToken] = useState("");
   const [userNo, setUserNo] = useState("");
+
   const {
     sellerNo,
     profileUrl,
@@ -46,12 +52,17 @@ const ChatScreenPage = ({ navigation, route }) => {
     chatRoom,
     productNo,
     thumbnail,
+    chatListToken,
   } = route?.params;
 
-  const _loaddatas = async () => {
+  useEffect(() => {
+    _loadData();
+  }, [isReady]);
+
+  const _loadData = async () => {
+    const id = await getItemFromAsync("userNo");
     if (chatRoom === undefined) {
       try {
-        const id = await getItemFromAsync("userNo");
         const config = {
           method: "POST",
           headers: {
@@ -70,11 +81,34 @@ const ChatScreenPage = ({ navigation, route }) => {
         );
         setUserNo(id);
         setChatRoomNo(response.chatRoomNo);
+        setIsReady(true);
       } catch (e) {
         Alert.alert("실패", e.message);
       }
     } else {
       setChatRoomNo(chatRoom);
+      setIsReady(true);
+    }
+
+    try {
+      const config = {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      };
+
+      const response = await fetch(
+        `${API_URL}/api/notification/token/${sellerNo}`,
+        config
+      ).then((res) => res.json());
+
+      setChatToken(response[0].token);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsReady(true);
     }
   };
 
@@ -102,14 +136,12 @@ const ChatScreenPage = ({ navigation, route }) => {
         chatRoomNo={chatRoomNo}
         profileUrl={profileUrl}
         nickname={nickname}
+        chatToken={chatToken}
+        chatListToken={chatListToken}
       />
     </Container>
   ) : (
-    <AppLoding
-      startAsync={_loaddatas}
-      onFinish={() => setIsReady(true)}
-      onError={console.error}
-    />
+    <ActivityIndicatorContainer />
   );
 };
 

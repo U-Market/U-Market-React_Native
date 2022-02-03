@@ -1,9 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import styled from "styled-components/native";
-import { Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
-
-import { ReadyContext } from "../../contexts";
 
 const Container = styled.SafeAreaView`
   display: flex;
@@ -25,14 +22,6 @@ const Title = styled.Text`
 `;
 
 const Header = ({ title, moveViewByNavigation }) => {
-  const { readyDispatch } = useContext(ReadyContext);
-
-  useEffect(() => {
-    return () => {
-      readyDispatch.notReady();
-    };
-  }, []);
-
   return (
     <Container>
       <Icon onPress={moveViewByNavigation}>

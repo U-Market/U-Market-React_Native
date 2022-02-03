@@ -1,34 +1,35 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
-import { Text, Alert } from "react-native";
-import AppLoding from "expo-app-loading";
+import { Alert } from "react-native";
 import { API_URL } from "@env";
 import { FlatList } from "react-native-gesture-handler";
 
-import { ReadyContext, ProgressContext } from "../../contexts";
-import { getItemFromAsync } from "../../utills/AsyncStorage";
+import { getItemFromAsync } from "../../utils/AsyncStorage";
 import Header from "../../components/commons/Header";
 import BuyerList from "../../components/reviews/BuyerList";
 
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
   background-color: ${({ theme }) => theme.background2};
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
 const BuyListSelectPage = ({ navigation, route }) => {
   const [buyerList, setBuyerList] = useState("");
   const [userNo, setUserNo] = useState("");
-  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { productNo, isSeller } = route?.params;
 
-  const { spinner } = useContext(ProgressContext);
-
-  const _loaddatas = async () => {
+  const _loadDatas = async () => {
     try {
-      spinner.start();
       const id = await getItemFromAsync("userNo");
       const config = {
         method: "GET",
@@ -47,11 +48,15 @@ const BuyListSelectPage = ({ navigation, route }) => {
     } catch (e) {
       Alert.alert("실패", e.message);
     } finally {
-      spinner.stop();
+      setIsLoading(true);
     }
   };
 
-  return isReady ? (
+  useEffect(() => {
+    _loadDatas();
+  }, [isLoading]);
+
+  return isLoading ? (
     <Container>
       <Header
         moveViewByNavigation={() => navigation.navigate("Main")}
@@ -67,18 +72,15 @@ const BuyListSelectPage = ({ navigation, route }) => {
             productNo={productNo}
             userNo={userNo}
             isSeller={isSeller}
-            setIsReady={setIsReady}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
           />
         )}
-        windowSize={3} //렌더링 되는양을 조절
+        windowSize={3}
       />
     </Container>
   ) : (
-    <AppLoding
-      startAsync={_loaddatas}
-      onFinish={() => setIsReady(true)}
-      onError={console.error}
-    />
+    <ActivityIndicatorContainer />
   );
 };
 

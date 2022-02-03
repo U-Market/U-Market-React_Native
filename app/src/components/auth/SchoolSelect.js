@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled, { ThemeContext } from "styled-components/native";
-import { Text, View, Alert } from "react-native";
+import { Text, Alert } from "react-native";
 import SelectBox from "react-native-multi-selectbox";
 import AppLoading from "expo-app-loading";
 import { API_URL } from "@env";
 
 import { ProgressContext } from "../../contexts";
 import region from "../../utills/region";
-import { Input, Button } from "../index";
+import { Button } from "../index";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -125,11 +125,11 @@ const SchoolSelect = ({ navigation }) => {
     setMajorsByOpenAPI();
   }, [selectedDepartment]);
 
-  // useEffect(() => {
-  //   if (selectedMajor.value === undefined) {
-  //     setDisabled(true);
-  //   } else return setDisabled(false);
-  // }, [selectedMajor]);
+  useEffect(() => {
+    if (selectedMajor.value === undefined) {
+      setDisabled(true);
+    } else return setDisabled(false);
+  }, [selectedMajor]);
 
   return isReady ? (
     <Container>
@@ -176,12 +176,7 @@ const SchoolSelect = ({ navigation }) => {
       </Modal>
 
       <ErrorText>{errorMessage}</ErrorText>
-      <Button
-        title="다음"
-        onPress={_handleAuthPage}
-        //disabled={disabled}
-        disabled={false}
-      />
+      <Button title="다음" onPress={_handleAuthPage} disabled={disabled} />
     </Container>
   ) : (
     <AppLoading

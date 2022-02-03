@@ -1,11 +1,11 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Alert, Text } from "react-native";
-import styled, { ThemeContext } from "styled-components/native";
+import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
 import { Input, Button } from "../index";
-import { ProgressContext } from "../../contexts";
-import { removeWhitespace, validateEmail } from "../../utills/common";
+
+import { removeWhitespace, validateEmail } from "../../utils/common";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -49,13 +49,10 @@ function FindId() {
 
   const didmountRef = useRef();
 
-  const { spinner } = useContext(ProgressContext);
-
   const _handleEmailChange = (email) => {
     setEmail(removeWhitespace(email));
   };
   const _handleFindIdSucess = (json) => {
-    // setFindId(json);
     Alert.alert("해당 이메일로 ID가 발송되었습니다.");
   };
 

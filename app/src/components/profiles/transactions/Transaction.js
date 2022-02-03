@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components/native";
 import {
   Dimensions,
@@ -6,12 +6,13 @@ import {
   Text,
   TouchableOpacity,
   View,
-  TextInput,
   ScrollView,
+  RefreshControl,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { API_URL } from "@env";
 
-import SawList from "../../main/sawProducts/SawList";
+import TransactionItem from "./TransactionItem";
+import { getItemFromAsync } from "../../../utils/AsyncStorage";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -23,8 +24,21 @@ const Container = styled.SafeAreaView`
   padding: 0;
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
+const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
+
 const Transaction = ({ navigation }) => {
   const [status, setStatus] = useState("판매중");
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const setStatusFilter = (status) => {
     setStatus(status);
@@ -41,7 +55,10 @@ const Transaction = ({ navigation }) => {
       return (
         <TouchableOpacity
           key={key}
-          style={[styles.btnTab]}
+          style={[
+            styles.btnTab,
+            status === _menu.status && styles.btnTabActive,
+          ]}
           onPress={() => {
             setStatusFilter(_menu.status);
           }}
@@ -59,38 +76,33 @@ const Transaction = ({ navigation }) => {
     });
   }
 
-  function SeeMainTab() {
-    // if (status === "판매중") {
-    //   return <SawList navigation={navigation} />;
-    // } else if (status === "판매완료") {
-    //   return <SawList navigation={navigation} />;
-    // } else {
-    //   return <SawList navigation={navigation} />;
-    // }
-    <Text>기능아직없음</Text>;
-  }
-
-  // function SeeMainTab() {
-  //   if (status === "판매중") {
-  //     return <SaleIng navigation={navigation} />;
-  //   } else if (status === "판매완료") {
-  //     return <SoldOut navigation={navigation} />;
-  //   } else {
-  //     return <Purchase navigation={navigation} />;
-  //   }
-  // }
-  useEffect(() => {}, []);
-  // if (isReady) {
+  const onRefresh = React.useCallback(() => {
+    setIsLoading(false);
+    wait(2000).then(() => setIsLoading(true));
+  }, []);
 
   return (
-    <ScrollView style={{ flex: 1, width: "100%" }}>
-      <Container>
-        <View style={styles.listTab}>
-          <>{_handleCurrentTab()}</>
-        </View>
-        {SeeMainTab()}
-      </Container>
-    </ScrollView>
+    <Container>
+      <View style={styles.listTab}>
+        <>{_handleCurrentTab()}</>
+      </View>
+      <ScrollView
+        style={{ flex: 1, width: "100%" }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {isLoading ? (
+          <TransactionItem
+            navigation={navigation}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+        ) : (
+          <ActivityIndicatorContainer color="#999999" />
+        )}
+      </ScrollView>
+    </Container>
   );
 };
 
@@ -100,14 +112,20 @@ const styles = StyleSheet.create({
   listTab: {
     flexDirection: "row",
     alignItems: "flex-start",
-
-    width: Dimensions.get("window").width,
+    width: "100%",
   },
   btnTab: {
-    width: 100,
+    width: 80,
+    padding: 5,
     flexDirection: "row",
     justifyContent: "center",
   },
+  btnTabActive: {
+    borderBottomWidth: 6,
+    borderColor: "#FFC352",
+    paddingBottom: 7,
+  },
+
   textTab: {
     fontSize: 16,
     paddingTop: 10,
@@ -118,7 +136,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     paddingLeft: 5,
     paddingRight: 5,
-    borderTopWidth: 4,
-    borderTopColor: "#FFC352",
   },
 });

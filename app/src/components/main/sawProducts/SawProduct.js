@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components/native";
 import { Text, ScrollView, Alert } from "react-native";
-import AppLoading from "expo-app-loading";
 import { API_URL } from "@env";
-import { getItemFromAsync } from "../../../utills/AsyncStorage";
+import { getItemFromAsync } from "../../../utils/AsyncStorage";
 
 import SawList from "./SawList";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;

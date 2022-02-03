@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
+import { ScrollView } from "react-native";
 import styled from "styled-components/native";
-import { Text } from "react-native";
 
-import { ReadyContext } from "../../contexts";
 import SignUp from "../../components/auth/SignUp";
 import Header from "../../components/commons/Header";
 
@@ -16,15 +15,16 @@ const SignUpPage = ({ navigation, route }) => {
   return (
     <Container>
       <Header
-        moveViewByNavigation={() => navigation.goBack()}
+        moveViewByNavigation={() => navigation.replace("SchoolSelectPage")}
         title={"회원가입"}
       />
-
-      <SignUp
-        navigation={navigation}
-        name={name}
-        selectedFilterData={selectedFilterData}
-      />
+      <ScrollView>
+        <SignUp
+          navigation={navigation}
+          name={name}
+          selectedFilterData={selectedFilterData}
+        />
+      </ScrollView>
     </Container>
   );
 };

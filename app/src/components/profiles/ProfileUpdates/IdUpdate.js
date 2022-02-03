@@ -1,23 +1,22 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components/native";
-import { Alert, Text, Image } from "react-native";
+import { Image } from "react-native";
 
 import ImageBox from "./ProfileImage";
-import { checkNickname, removeWhitespace } from "../../../utills/common";
+import { checkNickname, removeWhitespace } from "../../../utils/common";
 import { Button } from "../../";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
   justify-content: flex-start;
-
   background-color: ${({ theme }) => theme.background};
   margin: 0;
   padding-top: 40px;
   width: 100%;
 `;
-//터치로 바꿔서
-const ProfileImageContaier = styled.TouchableOpacity`
+
+const ProfileImagecontainer = styled.TouchableOpacity`
   margin-top: 10px;
 `;
 
@@ -34,20 +33,20 @@ const IDShow = styled.Text`
   font-size: 16px;
 `;
 
-const IDInputContainer = styled.View`
+const IdInputContainer = styled.View`
   padding-left: 20px;
   padding-top: 40px;
   color: ${({ theme }) => theme.text2};
   font-size: 16px;
 `;
 
-const IDInputText = styled.Text`
+const IdInputText = styled.Text`
   color: ${({ theme }) => theme.text};
   font-weight: bold;
   font-size: 16px;
 `;
 
-const IDInput = styled.TextInput.attrs({
+const IdInput = styled.TextInput.attrs({
   placeholderPaddingLeft: 20,
 })`
   background-color: ${({ theme }) => theme.background};
@@ -90,19 +89,17 @@ const IdUpdate = ({
   const [disabled, setDisabled] = useState(false);
   const didmountRef = useRef();
 
-  const _handleEmailChange = (nickname) => {
-    //공백제거 형식체크
+  const _handleNickChange = (nickname) => {
     const changedNickname = removeWhitespace(nickname);
     setNickname(changedNickname);
     setErrorNicknameMessage(
       checkNickname(changedNickname)
         ? ""
-        : t.print("PleaseKeepTheNicknameFormat")
+        : "닉네임은 한글, 영문, 숫자 2~10자 이내로 입력해주세요"
     );
   };
 
   useEffect(() => {
-    // 오류메시지가 바로뜨는걸 막는다.
     if (didmountRef.current) {
       let _emailNickNameMessage = "";
       if (!checkNickname(nickname)) {
@@ -135,7 +132,7 @@ const IdUpdate = ({
   const _showPhotos = () => {
     if (photos === undefined) {
       return (
-        <ProfileImageContaier
+        <ProfileImagecontainer
           onPress={() => navigation.navigate("ProfileImageMediaPage")}
         >
           <ImageBox
@@ -151,11 +148,11 @@ const IdUpdate = ({
               }}
             />
           </ViewImage>
-        </ProfileImageContaier>
+        </ProfileImagecontainer>
       );
     } else {
       return (
-        <ProfileImageContaier
+        <ProfileImagecontainer
           onPress={() => navigation.navigate("ProfileImageMediaPage")}
         >
           <ImageBox
@@ -165,7 +162,7 @@ const IdUpdate = ({
           <ViewImage>
             {photos && photos.map((item, i) => renderImage(item, i))}
           </ViewImage>
-        </ProfileImageContaier>
+        </ProfileImagecontainer>
       );
     }
   };
@@ -173,17 +170,17 @@ const IdUpdate = ({
   return (
     <Container>
       <>{_showPhotos()}</>
-      <IDInputContainer>
-        <IDInputText>{t.print("Nickname")}</IDInputText>
-        <IDInput
-          onChangeText={_handleEmailChange}
+      <IdInputContainer>
+        <IdInputText>{t.print("Nickname")}</IdInputText>
+        <IdInput
+          onChangeText={_handleNickChange}
           placeholder={profile.nickname}
         />
         <ErrorText>{errorNicknameMessage}</ErrorText>
 
         <IDShow>{t.print("Account")}</IDShow>
         <IDShow>{profile.email}</IDShow>
-      </IDInputContainer>
+      </IdInputContainer>
       <BtnContainer>
         <Button
           title={t.print("Register")}

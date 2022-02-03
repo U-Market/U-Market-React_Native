@@ -1,31 +1,31 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
-import { Text } from "react-native";
+import { Alert } from "react-native";
 import { API_URL } from "@env";
-import AppLoading from "expo-app-loading";
 
-import { ReadyContext, ProgressContext } from "../../contexts";
-import MyRelated from "../../components/profiles/MyRelated";
-import ProfileInformationContainer from "../../components/profiles/ProfileInfomationContainer";
+import MyActivity from "../../components/profiles/MyActivity";
+import ProfileInformationContainer from "../../components/profiles/mains/ProfileInfomationContainer";
 import Header from "../../components/commons/Header";
-import ProfileCategory from "../../components/profiles/ProfileCategory";
-import { getItemFromAsync } from "../../utills/AsyncStorage";
+import ProfileCategory from "../../components/profiles/mains/ProfileCategory";
+import { getItemFromAsync } from "../../utils/AsyncStorage";
 
 const Container = styled.SafeAreaView`
   flex: 1;
   background-color: ${({ theme }) => theme.background2};
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
 const profile = ({ navigation }) => {
   const [profile, setProfile] = useState("");
-  const [isReady, setIsReady] = useState(false);
-
-  const { spinner } = useContext(ProgressContext);
-  const { readyDispatch } = useContext(ReadyContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const _loadData = async () => {
     try {
-      spinner.start();
       const userNo = await getItemFromAsync("userNo");
       const config = {
         method: "GET",
@@ -41,14 +41,17 @@ const profile = ({ navigation }) => {
       ).then((res) => res.json());
 
       setProfile(response.profile);
+      setIsLoading(true);
     } catch (e) {
-      Alert.alert("게시글 정보를 불러오지 못했습니다.", e.message);
-    } finally {
-      spinner.stop();
+      Alert.alert("유저 정보를 불러오지 못했습니다.", e.message);
     }
   };
 
-  return isReady ? (
+  useEffect(() => {
+    _loadData();
+  }, [isLoading]);
+
+  return isLoading ? (
     <Container>
       <Header moveViewByNavigation={() => navigation.goBack()} title={"MY"} />
 
@@ -56,17 +59,13 @@ const profile = ({ navigation }) => {
         navigation={navigation}
         profile={profile}
         image={profile.profileUrl}
-        setIsReady={setIsReady}
+        setIsLoading={setIsLoading}
       />
-      <MyRelated navigation={navigation} />
+      <MyActivity navigation={navigation} />
       <ProfileCategory navigation={navigation} />
     </Container>
   ) : (
-    <AppLoading
-      startAsync={_loadData}
-      onFinish={() => setIsReady(true)}
-      onError={console.error}
-    />
+    <ActivityIndicatorContainer />
   );
 };
 

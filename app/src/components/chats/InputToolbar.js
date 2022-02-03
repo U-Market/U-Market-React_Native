@@ -1,7 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
-import { Image, Text } from "react-native";
 import {
   InputToolbar,
   Actions,
@@ -10,14 +9,12 @@ import {
 } from "../../../react-native-gifted-chat";
 import { Entypo } from "@expo/vector-icons";
 
-let SendText = "전송";
-
 export const renderInputToolbar = (props) => (
   <InputToolbar
     {...props}
     containerStyle={{
       backgroundColor: "#fff",
-      paddingTop: 6,
+      paddingTop: 1,
     }}
     primaryStyle={{ alignItems: "center" }}
   />

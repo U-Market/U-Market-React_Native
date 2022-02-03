@@ -1,7 +1,6 @@
-import React, { useContext, useState, useEffect } from "react";
-import styled, { ThemeContext } from "styled-components/native";
-import { AntDesign } from "@expo/vector-icons";
-import { Alert, Text } from "react-native";
+import React, { useState } from "react";
+import styled from "styled-components/native";
+import { Text } from "react-native";
 
 const Container = styled.View`
   width: 100%;
@@ -53,11 +52,10 @@ const LastQuestion = styled.TouchableOpacity`
   margin-left: 30px;
 `;
 
-const TradeRelated = ({ navigation }) => {
+const TradeRelated = () => {
   const [isTradeFirstQuestion, setIsTradeFirstQuestion] = useState(false);
   const [isTradeSecondQuestion, setIsTradeSecondQuestion] = useState(false);
   const [isTradeThirdQuestion, setIsTradeThridQuestion] = useState(false);
-  const theme = useContext(ThemeContext);
 
   const _selectTradeFirstQuestion = () => {
     setIsTradeFirstQuestion((isTradeFirstQuestion) => !isTradeFirstQuestion);

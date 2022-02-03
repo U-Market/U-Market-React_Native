@@ -1,21 +1,21 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import styled, { ThemeContext } from "styled-components/native";
-import { Text, View, Image, Alert } from "react-native";
+import styled from "styled-components/native";
+import { Text, Alert } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { API_URL } from "@env";
-import { auth } from "../../utills/firebase";
 
+import { API_URL } from "@env";
+import { auth } from "../../utils/firebase";
 import LoginQuestionBtn from "./LoginQuestionBtn";
 import {
   validateEmail,
   checkPassword,
   removeWhitespace,
-} from "../../utills/common";
+} from "../../utils/common";
 import { Input } from "../index";
-import { getItemFromAsync, setItemToAsync } from "../../utills/AsyncStorage";
-import t from "../../utills/translate/Translator";
-import { ProgressContext } from "../../contexts";
+import { ProgressContext, StudentContext } from "../../contexts";
+import { setItemToAsync } from "../../utils/AsyncStorage";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   justify-content: flex-start;
@@ -36,7 +36,7 @@ const InputContainer = styled.SafeAreaView`
 const FindIdContainer = styled.SafeAreaView`
   flex-direction: row;
   width: 80%;
-  height: 40px;
+  height: 50px;
   margin-bottom: 50px;
 `;
 
@@ -60,8 +60,6 @@ const Icon = styled.TouchableOpacity`
 `;
 
 const Login = ({ navigation }) => {
-  const theme = useContext(ThemeContext);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorEmailMessage, setErrorEmailMessage] = useState("");
@@ -69,12 +67,12 @@ const Login = ({ navigation }) => {
   const [disabled, setDisabled] = useState(false);
 
   const { spinner } = useContext(ProgressContext);
+  const { dispatch } = useContext(StudentContext);
 
   const passwordRef = useRef();
   const didmountRef = useRef();
 
   useEffect(() => {
-    // 오류메시지가 바로뜨는걸 막는다.
     if (didmountRef.current) {
       let _emailErrorMessage = "";
       let _passwordMessage = "";
@@ -95,16 +93,13 @@ const Login = ({ navigation }) => {
     }
   }, [email, password]);
 
-  // useEffect(() => {
-  //   setDisabled(
-  //     !(email && password && !errorEmailMessage && !errorPasswordMessage)
-  //   );
-  // }, [email, password, errorEmailMessage, errorPasswordMessage]);
-
-  useEffect(() => {}, []);
+  useEffect(() => {
+    setDisabled(
+      !(email && password && !errorEmailMessage && !errorPasswordMessage)
+    );
+  }, [email, password, errorEmailMessage, errorPasswordMessage]);
 
   const _handleEmailChange = (email) => {
-    //공백제거 형식체크
     const changedEmail = removeWhitespace(email);
     setEmail(changedEmail);
     setErrorEmailMessage(
@@ -123,8 +118,7 @@ const Login = ({ navigation }) => {
     );
   };
 
-  const _handleLoginButtonPress = async () => {
-    // setIsLogined(true);
+  const pressLoginBtn = async () => {
     const request = {
       email: email,
       psword: password,
@@ -136,34 +130,25 @@ const Login = ({ navigation }) => {
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify(request),
       }).then((res) => res.json());
-      console.log(response);
-      console.log(request);
       if (response?.email) {
         setItemToAsync("userNo", String(response.userNo));
         setItemToAsync("departmentNo", String(response.departmentNo));
         setItemToAsync("schoolNo", String(response.schoolNo));
         setItemToAsync("majorNo", String(response.majorNo));
         setItemToAsync("regionNo", String(response.regionNo));
-        // console.log(response);
+        setItemToAsync("nickname", String(response.nickname));
 
         auth.signInWithEmailAndPassword(email, password).catch((error) => {
           let errorMessage = error.message;
           alert(errorMessage);
         });
 
-        const unsubscribe = auth.onAuthStateChanged(function (user) {
-          if (user) {
-            navigation.replace("Main");
-          } else {
-            // No user is signed in.
-            navigation.canGoBack() && navigation.popToTop();
-          }
-        });
+        const unsubscribe = auth.onAuthStateChanged(function (user) {});
         Alert.alert(`${t.print("LoginSuccess")}`);
 
+        dispatch({ email });
         return unsubscribe;
       } else {
-        console.log(response);
         Alert.alert(response.error);
       }
     } catch (err) {
@@ -190,7 +175,8 @@ const Login = ({ navigation }) => {
             onChangeText={_handleEmailChange}
             onSubmitEditing={() => {}}
             placeholder={t.print("Email")}
-            returnKeyType='next'
+            returnKeyType="next"
+            keyboardType="email-address"
           />
           <ErrorText>{errorEmailMessage}</ErrorText>
           <Input
@@ -200,13 +186,12 @@ const Login = ({ navigation }) => {
             onChangeText={_handlePasswordChange}
             onSubmitEditing={() => {}}
             placeholder={t.print("Password")}
-            returnKeyType='done'
+            returnKeyType="done"
             isPassword
           />
           <ErrorText>{errorPasswordMessage}</ErrorText>
         </InputContainer>
-
-        {/* <FindIdContainer>
+        <FindIdContainer>
           <Icon>
             <AntDesign name="questioncircleo" size={24} color="#FFC352" />
           </Icon>
@@ -214,8 +199,7 @@ const Login = ({ navigation }) => {
             style={{
               color: "#FFC352",
               paddingHorizontal: 5,
-              alignSelf: "center",
-              justifyContent: "flex-end",
+              lineHeight: 45,
             }}
           >
             {t.print("DidYouForgetThePassword")}
@@ -223,10 +207,11 @@ const Login = ({ navigation }) => {
           <ArrowIcon onPress={_handleFindPage}>
             <AntDesign name="arrowright" size={24} color="#FFC352" />
           </ArrowIcon>
-        </FindIdContainer> */}
+        </FindIdContainer>
+
         <LoginQuestionBtn
           navigation={navigation}
-          onPress={_handleLoginButtonPress}
+          onPress={pressLoginBtn}
           disabled={disabled}
         />
       </Container>

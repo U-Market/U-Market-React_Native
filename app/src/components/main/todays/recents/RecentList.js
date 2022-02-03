@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components/native";
 
 import RecentItem from "./RecentItem";
-import t from "../../../../utills/translate/Translator";
+import t from "../../../../utils/translate/Translator";
 
 const ScrollView = styled.ScrollView.attrs((props) => ({
   horizontal: false,

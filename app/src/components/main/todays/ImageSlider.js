@@ -31,9 +31,9 @@ const ImageSlider = ({ images, resizeMode, isEvent }) => {
         />
       ) : (
         <SliderBox
-          circleLoop={true} //맨끝 슬라이드에서 다시 첫슬라이드로
-          resizeMode={resizeMode} // 이미지 사이즈 조절값
-          images={images} // 이미지 주소 리스트
+          circleLoop={true}
+          resizeMode={resizeMode}
+          images={images}
           sliderBoxHeight="100%"
           dotColor="#FFAE52"
           inactiveDotColor="#90A4AE"
@@ -47,7 +47,7 @@ const ImageSlider = ({ images, resizeMode, isEvent }) => {
           }}
           ImageComponentStyle={{
             borderRadius: 10,
-            width: "90%",
+            width: "70%",
           }}
         />
       )}

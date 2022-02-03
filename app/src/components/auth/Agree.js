@@ -1,6 +1,6 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
-import { Alert, CheckBox, Text } from "react-native";
-import styled, { ThemeContext } from "styled-components/native";
+import React, { useContext, useState, useEffect } from "react";
+import { CheckBox, Text } from "react-native";
+import styled from "styled-components/native";
 
 import { TearmsContext } from "../../contexts";
 

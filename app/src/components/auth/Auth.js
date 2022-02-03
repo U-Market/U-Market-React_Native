@@ -1,12 +1,11 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import styled, { ThemeContext } from "styled-components/native";
-import { Text, View } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import styled from "styled-components/native";
+import { Text, Image, Modal } from "react-native";
+import ImageViewer from "react-native-image-zoom-viewer";
 
 import { Input, Button } from "../index";
-import { ReadyContext } from "../../contexts";
-import ImageBox from "../Image";
-import { removeWhitespace, checkName } from "../../utills/common";
+import ImageBox from "../commons/Image";
+import { removeWhitespace, checkName } from "../../utils/common";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -14,7 +13,7 @@ const Container = styled.SafeAreaView`
   align-items: center;
   background-color: ${({ theme }) => theme.background};
   width: 100%;
-  padding-top: 40px;
+  margin-top: 40px;
 `;
 
 const PicutreContainer = styled.SafeAreaView`
@@ -22,6 +21,19 @@ const PicutreContainer = styled.SafeAreaView`
   width: 90%;
   padding-left: 18px;
   flex-direction: row;
+`;
+
+const ImagePinchContainer = styled.TouchableOpacity``;
+const ImageContainer = styled.View`
+  flex-direction: row;
+  width: 100%;
+`;
+
+const ViewImage = styled.View`
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  align-items: center;
 `;
 
 const ButtonContainer = styled.SafeAreaView`
@@ -53,56 +65,70 @@ const Auth = ({ navigation, photos, selectedFilterData }) => {
   const [name, setName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [disabled, setDisabled] = useState(false);
+  const [isModal, setIsModal] = useState(false);
 
   const _handleNameChange = (name) => {
-    //공백제거 형식체크
     const changedName = removeWhitespace(name);
     setName(changedName);
     setErrorMessage(checkName(changedName) ? "" : "이름 형식을 지켜주세요");
   };
 
   const _handleSignUpPage = () => {
-    navigation.navigate("SignUpPage", { name, selectedFilterData });
+    navigation.replace("SignUpPage", { name, selectedFilterData });
   };
 
   useEffect(() => {
     setDisabled(!(name && !errorMessage));
   }, [name, errorMessage]);
 
-  // const renderImage = (item, i) => {
-  //   return (
-  //     <Image
-  //       style={{ height: 80, width: 80, marginLeft: 5 }}
-  //       source={{ uri: item.uri }}
-  //       key={i}
-  //     />
-  //   );
-  // };
+  const renderImage = (item, i) => {
+    const images = [
+      {
+        url: `${item.uri}`,
+      },
+    ];
+    return (
+      <ImagePinchContainer onPress={() => setIsModal(!isModal)}>
+        <Image
+          style={{ height: 80, width: 100, marginLeft: 5, borderRadius: 5 }}
+          resizeMode={"cover"}
+          source={{ uri: item.uri }}
+          key={i}
+        />
+        <Modal visible={isModal} transparent={true}>
+          <ImageViewer
+            imageUrls={images}
+            onClick={() => setIsModal(!isModal)}
+          />
+        </Modal>
+      </ImagePinchContainer>
+    );
+  };
 
-  // const _showPhotos = () => {
-  //   if (photos === undefined) {
-  //     return (
-  //       <ImageBox
-  //         // url={photoUrl}
-  //         showButton
-  //         onPress={() => navigation.navigate("ImageMediaPage", { isMarket })}
-  //       />
-  //     );
-  //   } else {
-  //     return (
-  //       <ImageContainer>
-  //         <ImageBox
-  //           // url={photoUrl}
-  //           showButton
-  //           onPress={() => navigation.navigate("ImageMediaPage", { isMarket })}
-  //         />
-  //         <ScrollViewImage>
-  //           {photos && photos.map((item, i) => renderImage(item, i))}
-  //         </ScrollViewImage>
-  //       </ImageContainer>
-  //     );
-  //   }
-  // };
+  const _showPhotos = () => {
+    if (photos === undefined) {
+      return (
+        <ImageBox
+          url={photos && photos.map((item, i) => renderImage(item, i))}
+          showButton
+          onPress={() => navigation.navigate("IDCardImagePage")}
+        />
+      );
+    } else {
+      return (
+        <ImageContainer>
+          <ImageBox
+            url={photos && photos.map((item, i) => renderImage(item, i))}
+            showButton
+            onPress={() => navigation.navigate("IDCardImagePage")}
+          />
+          <ViewImage>
+            {photos && photos.map((item, i) => renderImage(item, i))}
+          </ViewImage>
+        </ImageContainer>
+      );
+    }
+  };
 
   return (
     <Container>
@@ -138,16 +164,10 @@ const Auth = ({ navigation, photos, selectedFilterData }) => {
         학생증, 재학 증면서, 졸업장 등
       </Text>
       <PicutreContainer>
-        {/* <>{_showPhotos()}</> */}
-
-        <ImageBox
-          // url={photoUrl}
-          showButton
-          onPress={() => navigation.navigate("ImageMediaPage", { isMarket })}
-        />
+        <>{_showPhotos()}</>
       </PicutreContainer>
 
-      <ButtonContainer>
+      {/* <ButtonContainer>
         <ImageButton>
           <Text
             style={{
@@ -174,7 +194,7 @@ const Auth = ({ navigation, photos, selectedFilterData }) => {
             파일찾기
           </Text>
         </ImageButton>
-      </ButtonContainer>
+      </ButtonContainer> */}
 
       <Button title="다음" onPress={_handleSignUpPage} disabled={disabled} />
     </Container>

@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components/native";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 
-import t from "../../../../utills/translate/Translator";
+import t from "../../../../utils/translate/Translator";
 
 const Container = styled.TouchableOpacity`
   width: 48%;
@@ -66,11 +66,15 @@ const Item = ({
       productNo: productNo,
     });
 
+  const conversionPrice = () => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   return (
     <Container onPress={_handleItemPress}>
       <StyledImage source={{ uri: imgUrl }} />
       <ItemContent>
-        <ItemPrice>{`${price}${t.print("Won")}`}</ItemPrice>
+        <ItemPrice>{`${conversionPrice()}${t.print("Won")}`}</ItemPrice>
       </ItemContent>
       <ItemTitle>{itemTitle}</ItemTitle>
       <ItemContent>

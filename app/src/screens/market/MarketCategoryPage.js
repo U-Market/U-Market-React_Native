@@ -1,24 +1,14 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components/native";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from "react-native";
-import AppLoading from "expo-app-loading";
-import { API_URL } from "@env";
-import { getItemFromAsync } from "../../utills/AsyncStorage";
+import { Dimensions, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-import MarketCategory from "../../components/markets/MarketCategory";
+import MarketCategory from "../../components/markets/mains/MarketCategory";
 import Header from "../../components/commons/Header";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
-  background-color: ${({ theme }) => theme.background2};
+  background-color: ${({ theme }) => theme.background};
 `;
 
 const ScrollHorizontalView = styled.ScrollView.attrs({
@@ -36,7 +26,10 @@ const MarketCategoryPage = ({ navigation, route }) => {
   const [status, setStatus] = useState(t.print("All"));
   const [detail, setDetail] = useState("");
 
-  const { headerTitle, categoryNo, searchList } = route.params;
+  const { headerTitle, categoryNo, searchList, selectedFilterData } =
+    route.params;
+
+  console.log(searchList, "marketcategorypage searchList");
 
   let listBtn = [];
   switch (categoryNo) {
@@ -160,6 +153,7 @@ const MarketCategoryPage = ({ navigation, route }) => {
         status={status}
         detail={detail}
         searchList={searchList}
+        selectedFilterData={selectedFilterData}
       ></MarketCategory>
     </Container>
   );
@@ -172,7 +166,6 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     flexDirection: "row",
     alignItems: "flex-start",
-
     backgroundColor: "#fff",
   },
   btnTab: {
@@ -180,22 +173,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 10,
     paddingTop: 15,
-    paddingBottom: 15,
-    // borderWidth: 1,
-    // borderRightWidth: 1,
-    // borderLeftWidth: 0.5,
-    // borderColor: "#e3e3e3",
-    // borderRadius: 10,
+    paddingBottom: 10,
   },
   textTab: {
     fontSize: 14,
-    // margin: 3,
     color: "#222",
     alignSelf: "center",
   },
   TextTabActive: {
     color: "#ffc352",
-    // borderBottomWidth: 1,
     fontWeight: "bold",
   },
   BtnActive: {

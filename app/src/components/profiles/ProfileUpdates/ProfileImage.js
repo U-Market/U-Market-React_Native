@@ -5,7 +5,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Platform, Alert } from "react-native";
 
 import * as Permissions from "expo-permissions";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 const Container = styled.View`
   align-self: center;
@@ -19,17 +19,6 @@ const StyledImage = styled.View`
   border-radius: 50px;
   border-color: ${({ theme }) => theme.mainOrange};
 `;
-
-// const ButtonContainer = styled.TouchableOpacity`
-//   position: absolute;
-//   bottom: 0px;
-//   right: -10px;
-//   width: 50px;
-//   height: 30px;
-//   border-radius: 20px;
-//   justify-content: center;
-//   align-items: center;
-// `;
 
 const HaveProfileImageButtonContainer = styled.TouchableOpacity`
   position: absolute;
@@ -57,15 +46,7 @@ const PhotoButton = ({ onPress }) => {
   );
 };
 
-const Image = ({
-  url,
-  imageStyle,
-  rounded,
-  showButton,
-  onChangeImage,
-  navigation,
-  onPress,
-}) => {
+const Image = ({ url, imageStyle, showButton, onPress }) => {
   useEffect(() => {
     (async () => {
       try {

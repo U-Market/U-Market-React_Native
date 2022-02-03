@@ -1,15 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components/native";
-import {
-  Alert,
-  Text,
-  Image,
-  Modal,
-  View,
-  TouchableOpacity,
-} from "react-native";
-import { API_URL } from "@env";
-import t from "../../utills/translate/Translator";
+import { Alert, Image } from "react-native";
+import { API_URL, FIREBASE_API_KEY } from "@env";
+
+import t from "../../utils/translate/Translator";
 
 const Container = styled.TouchableOpacity`
   flex-direction: row;
@@ -43,28 +37,44 @@ const Content = styled.Text`
   font-size: 12px;
 `;
 
-const ModalRowContainer = styled.View`
-  width: 100%;
-  flex-direction: row;
-  justify-content: center;
-`;
-
-const ModalTextContainer = styled.View`
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 15px;
-`;
-
 const BuyList = ({
   navigation,
   buyerList,
   productNo,
   userNo,
   isSeller,
-  setIsReady,
+  isLoading,
+  setIsLoading,
 }) => {
-  const handleBuyerListSelectPage = async () => {
+  const [buyerSelectToken, setBuyerSelectToken] = useState("");
+
+  useEffect(() => {
+    getToken();
+  }, []);
+
+  const getToken = async () => {
+    try {
+      const config = {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      };
+
+      const response = await fetch(
+        `${API_URL}/api/notification/token/${buyerList.userNo}`,
+        config
+      ).then((res) => res.json());
+
+      setBuyerSelectToken(response[0].token);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const moveReviewWritePage = async () => {
+    let buyerToken;
     try {
       const config = {
         method: "PATCH",
@@ -83,6 +93,7 @@ const BuyList = ({
     } catch (e) {
       Alert.alert(t.print("StateTransitionFailed"), e.message);
     }
+
     try {
       const config = {
         method: "POST",
@@ -98,7 +109,7 @@ const BuyList = ({
         `${API_URL}/api/review/${buyerList.userNo}`,
         config
       ).then((res) => res.json());
-
+      sendPushBuyerSelectNotification(buyerSelectToken);
       navigation.navigate("ReviewWritePage", {
         productNo: productNo,
         sellerNo: userNo,
@@ -110,16 +121,52 @@ const BuyList = ({
         title: buyerList.title,
         isSeller: isSeller,
         writer: 0,
-        setIsReady: setIsReady,
+        setIsLoading: setIsLoading,
+        isLoading: isLoading,
+        buyerToken: buyerToken,
       });
     } catch (e) {
       Alert.alert(t.print("BuyerRegistrationFailed"), e.message);
     }
   };
 
+  async function sendPushBuyerSelectNotification(buyerSelectToken) {
+    const message = {
+      to: buyerSelectToken,
+      notification: {
+        title: `거래완료된 상품이 있습니다. 리뷰를 작성해주세요`,
+        body: ``,
+        vibrate: 1,
+        sound: 1,
+        show_in_foreground: true,
+        priority: "normal",
+        content_available: true,
+      },
+      data: {
+        experienceId: "@jsj4351/U-Market",
+        title: `거래완료된 상품이 있습니다. 리뷰를 작성해주세요`,
+        body: ``,
+        score: 50,
+        wicket: 1,
+      },
+    };
+
+    let headers = new Headers({
+      "Content-Type": "application/json",
+      Authorization: `key=${FIREBASE_API_KEY}`,
+    });
+
+    let response = await fetch("https://fcm.googleapis.com/fcm/send", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(message),
+    });
+    response = await response.json();
+  }
+
   return (
     <>
-      <Container onPress={handleBuyerListSelectPage}>
+      <Container onPress={moveReviewWritePage}>
         <Icon>
           <Image
             style={{
