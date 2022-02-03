@@ -4,8 +4,8 @@ import { Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as App from "expo-updates";
 
-import { getItemFromAsync, setItemToAsync } from "../../utills/AsyncStorage";
-import t from "../../utills/translate/Translator";
+import { setItemToAsync } from "../../utils/AsyncStorage";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;

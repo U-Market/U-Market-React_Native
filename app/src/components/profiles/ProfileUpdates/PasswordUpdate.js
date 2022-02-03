@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components/native";
-import { Alert, Text } from "react-native";
+import { Alert } from "react-native";
 
-import { checkPassword, removeWhitespace } from "../../../utills/common";
+import { checkPassword, removeWhitespace } from "../../../utils/common";
 import { Button } from "../../index";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -14,13 +14,6 @@ const Container = styled.SafeAreaView`
   margin: 0;
   padding-top: 40px;
   width: 100%;
-`;
-
-const IDShow = styled.Text`
-  padding-left: 20px;
-  padding-top: 5px;
-  color: ${({ theme }) => theme.text2};
-  font-size: 16px;
 `;
 
 const IDInputContainer = styled.View`
@@ -61,7 +54,7 @@ const ErrorText = styled.Text`
   margin-bottom: 30px;
 `;
 
-const IdUpdate = () => {
+const PasswordUpdate = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -74,12 +67,11 @@ const IdUpdate = () => {
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
 
-  const _handlePasswordUpdate = () => {
+  const pressPasswordUpdate = () => {
     Alert.alert("아직기능없음");
   };
 
   useEffect(() => {
-    // 오류메시지가 바로뜨는걸 막는다.
     if (didmountRef.current) {
       let _passwordMessage = "";
       let _passwordConfirmMessage = "";
@@ -100,7 +92,6 @@ const IdUpdate = () => {
   }, [password, passwordConfirm]);
 
   const _handleCurrentPassword = (currentPassword) => {
-    //공백제거 형식체크
     const currentPasswordRmSpace = removeWhitespace(currentPassword);
     if (currentPasswordRmSpace !== currentPassword) {
       setErrorCurrentMessage(
@@ -161,7 +152,7 @@ const IdUpdate = () => {
           onChangeText={_handlePasswordChange}
           placeholder={t.print("password")}
           secureTextEntry={true}
-          returnKeyType='next'
+          returnKeyType="next"
         />
         <ErrorText>{errorPasswordMessage}</ErrorText>
 
@@ -172,18 +163,18 @@ const IdUpdate = () => {
           onChangeText={_handlePasswordConfirmChange}
           placeholder={t.print("Verifypassword")}
           secureTextEntry={true}
-          returnKeyType='done'
+          returnKeyType="done"
         />
         <ErrorText>{errorPasswordConfirmMessage}</ErrorText>
 
         <Button
           title={t.print("ChangePassword")}
           disabled={disabled}
-          onPress={_handlePasswordUpdate}
+          onPress={pressPasswordUpdate}
         />
       </IDInputContainer>
     </Container>
   );
 };
 
-export default IdUpdate;
+export default PasswordUpdate;

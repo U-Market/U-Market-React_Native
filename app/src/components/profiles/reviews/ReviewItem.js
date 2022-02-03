@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components/native";
-import { StyleSheet, TouchableOpacity, Dimensions, View } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import Stars from "react-native-stars";
+import { API_URL } from "@env";
 
 import { theme } from "../../../theme";
-import Stars from "react-native-stars";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
 
 const Container = styled.Pressable`
   width: 100%;
   background-color: ${({ theme }) => theme.background};
-  margin-bottom: 5px;
 `;
 
 const StyledImage = styled.Image.attrs((props) => ({
@@ -18,14 +18,13 @@ const StyledImage = styled.Image.attrs((props) => ({
 }))`
   height: 80px;
   width: 80px;
-
   border-radius: 12px;
-
   border-color: gray;
 `;
 
 const ItemContent = styled.View`
   padding-left: 20px;
+  margin-bottom: 5px;
 `;
 
 const MainContainer = styled.View`
@@ -50,18 +49,12 @@ const MainPressContainer = styled.TouchableOpacity`
   padding-bottom: 10px;
 `;
 
-const RowContainer = styled.View`
-  flex-direction: row;
-  align-items: center;
-  padding-top: 10px;
-`;
-
 const ItemTitle = styled.Text.attrs(() => ({
   numberOfLines: 1,
 }))`
-  font-size: 16px;
-  margin-top: 5px;
-  padding-bottom: 3px;
+  font-size: 18px;
+  margin-top: 3px;
+  margin-bottom: 3px;
   color: ${({ theme }) => theme.text};
   font-weight: bold;
 `;
@@ -70,21 +63,20 @@ const ItemSubTitle = styled.Text.attrs(() => ({
   numberOfLines: 1,
 }))`
   font-size: 12px;
-  padding-bottom: 3px;
-  color: ${({ theme }) => theme.postdate};
-`;
-
-const ItemCategory = styled.Text`
-  font-size: 12px;
-  font-weight: bold;
-  padding-left: 10px;
-  color: ${({ theme }) => theme.postdate};
+  margin-bottom: 3px;
+  color: ${({ theme }) => theme.text2};
 `;
 
 const PostDate = styled.Text`
-  color: ${({ theme }) => theme.text2};
+  color: ${({ theme }) => theme.postdate};
   margin-top: 10px;
   font-size: 11px;
+`;
+
+const RowContainer = styled.View`
+  flex-direction: row;
+  align-items: center;
+  padding-top: 10px;
 `;
 
 const GradeTitle = styled.Text`
@@ -99,102 +91,145 @@ const GradeContent = styled.Text.attrs(() => ({
   font-size: 12px;
   padding-left: 20px;
   padding-top: 5px;
-  color: ${({ theme }) => theme.postdate};
+  color: ${({ theme }) => theme.text2};
 `;
 
 const Item = ({
-  imgUrl,
-  itemTitle,
-  trustScore,
-  inDate,
-  nickname,
-  rating,
-  description,
-  productNo,
-  userNo,
-  category,
-  buyerNo,
+  review,
   navigation,
   isSeller,
-  setIsReady,
-  sellerNo,
+  setIsLoading,
+  isLoading,
+  userNo,
 }) => {
-  //if (0 <== grade <== 1)
-  const _handleItemPress = () => {
+  useEffect(() => {
+    getToken();
+  }, []);
+
+  let buyerToken;
+
+  const getToken = async () => {
+    if (isSeller) {
+      try {
+        const config = {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        };
+
+        const response = await fetch(
+          `${API_URL}/api/notification/token/${review.buyerNo}`,
+          config
+        ).then((res) => res.json());
+
+        buyerToken = response[0].token;
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      try {
+        const config = {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        };
+
+        const response = await fetch(
+          `${API_URL}/api/notification/token/${review.sellerNo}`,
+          config
+        ).then((res) => res.json());
+
+        buyerToken = response[0].token;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
+
+  const moveReviewWritePage = () => {
     if (isSeller) {
       navigation.navigate("ReviewWritePage", {
-        productNo: productNo,
+        no: review.no,
         sellerNo: userNo,
-        buyerNo: buyerNo,
-        thumbnail: imgUrl,
-        category: category,
-        nickname: nickname,
-        title: itemTitle,
+        buyerNo: review.buyerNo,
+        thumbnail: review.thumbnail,
+        category: review.category,
+        nickname: review.nickname,
+        title: review.title,
         writer: 0,
         isSeller: isSeller,
-        setIsReady: setIsReady,
+        setIsLoading: setIsLoading,
+        isLoading: isLoading,
+        buyerToken: buyerToken,
       });
     } else {
       navigation.navigate("ReviewWritePage", {
-        productNo: productNo,
-        sellerNo: sellerNo,
-        buyerNo: buyerNo,
-        thumbnail: imgUrl,
-        category: category,
-        nickname: nickname,
-        title: itemTitle,
+        no: review.no,
+        sellerNo: review.sellerNo,
+        buyerNo: review.buyerNo,
+        thumbnail: review.thumbnail,
+        category: review.category,
+        nickname: review.nickname,
+        title: review.title,
         writer: 1,
         isSeller: isSeller,
-        setIsReady: setIsReady,
+        setIsLoading: setIsLoading,
+        isLoading: isLoading,
+        buyerToken: buyerToken,
       });
     }
   };
 
-  if (description !== undefined) {
+  if (review.description !== undefined) {
     return (
       <TouchableOpacity style={styles.shoadowBox}>
         <Container>
           <MainContainer>
-            <StyledImage source={{ uri: imgUrl }} />
+            <StyledImage source={{ uri: review.thumbnail }} />
             <ItemContent>
-              <ItemTitle>{itemTitle}</ItemTitle>
-              <ItemSubTitle>{nickname}</ItemSubTitle>
-              <PostDate>{inDate}</PostDate>
+              <ItemTitle>{review.title}</ItemTitle>
+              <ItemSubTitle>{review.nickname}</ItemSubTitle>
+
+              <PostDate>{review.inDate}</PostDate>
             </ItemContent>
           </MainContainer>
           <RowContainer>
             <GradeTitle>{t.print("score")}</GradeTitle>
             <Stars
-              display={rating}
+              display={review.trustScore}
               spacing={8}
               count={5}
-              starSize={30}
+              starSize={24}
               fullStar={require("../../../icons/star.png")}
               emptyStar={require("../../../icons/emptyStar.png")}
             />
           </RowContainer>
-          <GradeContent>{description}</GradeContent>
+          <GradeContent>{review.description}</GradeContent>
         </Container>
       </TouchableOpacity>
     );
   } else {
     return (
       <Container>
-        <MainPressContainer onPress={_handleItemPress}>
-          <StyledImage source={{ uri: imgUrl }} />
+        <MainPressContainer onPress={moveReviewWritePage}>
+          <StyledImage source={{ uri: review.thumbnail }} />
           <ItemContent>
             {t.getLanguage("en") ? (
-              <ItemTitle>{`${t.print(
-                "writeReviewToggle"
-              )}${nickname}`}</ItemTitle>
+              <ItemTitle>{`${t.print("writeReviewToggle")}${
+                review.nickname
+              }`}</ItemTitle>
             ) : (
-              <ItemTitle>{`${nickname} ${t.print(
+              <ItemTitle>{`${review.nickname} ${t.print(
                 "writeReviewToggle"
               )}`}</ItemTitle>
             )}
-            <ItemSubTitle>{itemTitle}</ItemSubTitle>
+            <ItemSubTitle>{review.title}</ItemSubTitle>
 
-            <PostDate>{inDate}</PostDate>
+            <PostDate>{review.inDate}</PostDate>
           </ItemContent>
         </MainPressContainer>
       </Container>
@@ -206,15 +241,10 @@ export default Item;
 
 const styles = StyleSheet.create({
   shoadowBox: {
-    // width: Dimensions.get("window").width,
     backgroundColor: theme.background,
-
     flexDirection: "row",
     alignItems: "flex-start",
-
-    marginBottom: 10,
     height: 200,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

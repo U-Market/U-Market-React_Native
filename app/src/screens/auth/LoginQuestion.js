@@ -1,12 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components/native";
-import { Text } from "react-native";
 
-import { ReadyContext, TearmsContext } from "../../contexts";
+import { TearmsContext } from "../../contexts";
 
-import Login from "../../components/auth/Login";
-
-import SchoolSelectPage from "./SchoolSelectPage";
 import LoginQuestionText from "../../components/auth/LoginQuestionText";
 import LoginQuestionBtn from "../../components/auth/LoginQuestionBtn";
 
@@ -19,8 +15,8 @@ const Container = styled.SafeAreaView`
   padding: 0;
 `;
 
-const LoginQuestionPage = ({ navigation, props }) => {
-  const { isAgree, agreeDispatch } = useContext(TearmsContext);
+const LoginQuestionPage = ({ navigation }) => {
+  const { agreeDispatch } = useContext(TearmsContext);
 
   useEffect(() => {
     agreeDispatch.disAgree();
@@ -31,7 +27,7 @@ const LoginQuestionPage = ({ navigation, props }) => {
       <LoginQuestionText></LoginQuestionText>
       <LoginQuestionBtn
         navigation={navigation}
-        onPress={() => navigation.navigate("LoginPage")}
+        onPress={() => navigation.replace("LoginPage")}
       ></LoginQuestionBtn>
     </Container>
   );

@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components/native";
-import { Text, View, Image } from "react-native";
+import { View, Image } from "react-native";
 
 import { Button } from "../";
-import { ReadyContext, TearmsContext } from "../../contexts";
-import t from "../../utills/translate/Translator";
+
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   justify-content: center;
@@ -21,7 +21,7 @@ const OuathBtn = styled.TouchableOpacity`
   border-radius: 10px;
   border: 1px;
   border-color: ${({ theme }) => theme.mainOrange};
-  margin-top: 10px;
+  margin-top: 5px;
   align-items: center;
   justify-content: center;
 `;
@@ -45,7 +45,7 @@ const LoginQuestionBtn = ({ navigation, isReady, onPress, disabled }) => {
       <Button title={t.print("Login")} onPress={onPress} disabled={disabled} />
       <Button
         title={t.print("SignUp")}
-        onPress={() => navigation.navigate("SchoolSelectPage")}
+        onPress={() => navigation.replace("SchoolSelectPage")}
       />
       <OuathBtn>
         <Icon>

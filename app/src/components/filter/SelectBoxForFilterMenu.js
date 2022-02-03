@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Alert } from "react-native";
 
-import Http from "../../utills/Http";
-import SelectBox from "../utils/SelectBox";
-import regions from "../../utills/region";
+import Http from "../../utils/Http";
+import SelectBox from "../commons/SelectBox";
+import regions from "../../utils/region";
 import { API_URL } from "@env";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const SelectBoxForFilterMenu = ({
   menuName,
@@ -19,20 +19,22 @@ const SelectBoxForFilterMenu = ({
   const [majors, setMajors] = useState([]);
 
   const setSchoolsByHttp = async () => {
-    if (!selectedFilterData.selectedRegion?.item) {
-      Alert.alert(t.print("FirstRegion"));
-      setMenuName(t.print("region"));
-      return;
-    }
+    try {
+      if (!selectedFilterData.selectedRegion?.item) {
+        Alert.alert(t.print("FirstRegion"));
+        setMenuName(t.print("region"));
+        return;
+      }
 
-    const { response, status } = await Http.get(
-      `/pick/regions/${selectedFilterData.selectedRegion.value}/schools`
-    );
-    if (status === 200) {
-      setSchools([...response]);
-    } else {
-      setSchools([]);
-    }
+      const { response, status } = await Http.get(
+        `/pick/regions/${selectedFilterData.selectedRegion.value}/schools`
+      );
+      if (status === 200) {
+        setSchools([...response]);
+      } else {
+        setSchools([]);
+      }
+    } catch (e) {}
   };
 
   const setDepartmentsByHttp = async () => {
@@ -48,38 +50,40 @@ const SelectBoxForFilterMenu = ({
   };
 
   const setMajorsByHttp = async () => {
-    if (!selectedFilterData.selectedDepartment?.item) {
-      Alert.alert(t.print("FirstUndergraduate"));
-      setMenuName(t.print("undergraduate"));
-      return;
-    }
-
-    const url = isSignUpPage
-      ? `https://www.career.go.kr/cnet/openapi/getOpenApi?apiKey=20bdb3905002066993ee1c718f00680c&svcType=api&svcCode=MAJOR&contentType=json&gubun=univ_list&subject=${selectedFilterData.selectedDepartment.value}&perPage=10000000`
-      : `${API_URL}/api/pick/departments/${selectedFilterData.selectedDepartment.value}/majors`;
-
-    const response = await fetch(url).then((res) => res.json());
-
-    if (isSignUpPage) {
-      // OpenAPI를 사용하여 불러온 전공 데이터 세팅
-      const majorsByOpenAPI = response.dataSearch.content.reduce(
-        (acc, info) => {
-          const majors = info.facilName.split(",").map((el, i) => {
-            return { item: el, value: i };
-          });
-          return [...acc, ...majors];
-        },
-        []
-      );
-      setMajors([...majorsByOpenAPI]);
-    } else {
-      // U-Market DB에서 불러온 전공 데이터 세팅
-      if (response.length) {
-        setMajors([...response]);
-      } else {
-        setMajors([]);
+    try {
+      if (!selectedFilterData.selectedDepartment?.item) {
+        Alert.alert(t.print("FirstUndergraduate"));
+        setMenuName(t.print("undergraduate"));
+        return;
       }
-    }
+
+      const url = isSignUpPage
+        ? `https://www.career.go.kr/cnet/openapi/getOpenApi?apiKey=20bdb3905002066993ee1c718f00680c&svcType=api&svcCode=MAJOR&contentType=json&gubun=univ_list&subject=${selectedFilterData.selectedDepartment.value}&perPage=10000000`
+        : `${API_URL}/api/pick/departments/${selectedFilterData.selectedDepartment.value}/majors`;
+
+      const response = await fetch(url).then((res) => res.json());
+
+      if (isSignUpPage) {
+        // OpenAPI를 사용하여 불러온 전공 데이터 세팅
+        const majorsByOpenAPI = response.dataSearch.content.reduce(
+          (acc, info) => {
+            const majors = info.facilName.split(",").map((el, i) => {
+              return { item: el, value: i };
+            });
+            return [...acc, ...majors];
+          },
+          []
+        );
+        setMajors([...majorsByOpenAPI]);
+      } else {
+        // U-Market DB에서 불러온 전공 데이터 세팅
+        if (response.length) {
+          setMajors([...response]);
+        } else {
+          setMajors([]);
+        }
+      }
+    } catch (e) {}
   };
 
   useEffect(() => {

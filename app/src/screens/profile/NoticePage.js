@@ -5,7 +5,7 @@ import { Text } from "react-native";
 import { ReadyContext } from "../../contexts";
 import Header from "../../components/commons/Header";
 
-import NoticeList from "../../components/profiles/NoticeList";
+import NoticeList from "../../components/profiles/mains/NoticeList";
 
 const Container = styled.SafeAreaView`
   flex: 1;

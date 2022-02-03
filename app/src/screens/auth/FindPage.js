@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Text } from "react-native";
+import React from "react";
+
 import styled from "styled-components/native";
 
 import FindPw from "../../components/auth/FindPw";
 import Header from "../../components/commons/Header";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;

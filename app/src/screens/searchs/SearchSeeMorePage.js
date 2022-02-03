@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components/native";
-import { Text, Alert } from "react-native";
 
 import Header from "../../components/commons/Header";
-import Community from "../../components/boards/FreeBoardComponent";
-import t from "../../utills/translate/Translator";
+import Community from "../../components/communitys/boards/read-list/Community";
 import { FlatList } from "react-native-gesture-handler";
 
 const Container = styled.SafeAreaView`
@@ -14,7 +12,7 @@ const Container = styled.SafeAreaView`
 
 const SearchSeeMorePage = ({ navigation, route }) => {
   const { communities, headerTitle } = route?.params;
-  console.log(communities, headerTitle);
+
   return (
     <Container>
       <Header

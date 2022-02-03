@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Alert } from "react-native";
+import React, { useEffect } from "react";
 import styled from "styled-components/native";
-import AppLoading from "expo-app-loading";
 
 import SawItem from "./SawItem";
 
@@ -34,8 +32,6 @@ const SawList = ({ navigation, products }) => {
 
     return Items;
   };
-
-  useEffect(() => {}, []);
 
   return <ScrollView>{_SawItems()}</ScrollView>;
 };

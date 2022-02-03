@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components/native";
-import { Text } from "react-native";
 
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 2;

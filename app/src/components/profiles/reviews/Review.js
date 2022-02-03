@@ -1,19 +1,15 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from "react-native";
-import AppLoading from "expo-app-loading";
+import { TouchableOpacity, ScrollView, RefreshControl } from "react-native";
 import { API_URL } from "@env";
-import { getItemFromAsync } from "../../../utills/AsyncStorage";
+import { getItemFromAsync } from "../../../utils/AsyncStorage";
+import { FlatList } from "react-native-gesture-handler";
 
 import ReviewList from "./ReviewList";
-import t from "../../../utills/translate/Translator";
+import t from "../../../utils/translate/Translator";
+
+const NUMCOLUMNS = 1;
+const INITIAL_START_NO = 0;
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -40,12 +36,33 @@ const TopBarText = styled.Text`
   color: ${({ theme, isActive }) => (isActive ? theme.mainOrange : theme.text)};
 `;
 
+const Text = styled.Text`
+  font-size: 16px;
+  font-family: ROBOTO_REGULAR;
+  margin: 6px 0 0px 20px;
+  color: ${({ theme }) => theme.placeholder};
+`;
+
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
+const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
+
 const Review = ({ navigation }) => {
-  const [isReady, setIsReady] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState(t.print("WrittenReview"));
   const [reviews, setReviews] = useState([]);
   const [userNo, setUserNo] = useState("");
   const [isSeller, setIsSeller] = useState(true);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [reviewsLength, setReviewLength] = useState(0);
 
   const listBtn = [
     { status: t.print("WrittenReview") },
@@ -54,7 +71,11 @@ const Review = ({ navigation }) => {
     { status: t.print("NotReceivedReview") },
   ];
 
-  function _handleCurrentBtn() {
+  useEffect(() => {
+    _setReviewsByFetch();
+  }, [status, isLoading]);
+
+  function selectCurrentReviewList() {
     return listBtn.map((_menu, key) => {
       return (
         <TouchableOpacity
@@ -71,67 +92,123 @@ const Review = ({ navigation }) => {
     });
   }
 
-  async function _setProductsByFetch() {
+  const _setReviewsByFetch = async () => {
     const id = await getItemFromAsync("userNo");
-
     setUserNo(id);
-    if (status === t.print("WrittenReview")) {
-      const response = await fetch(`${API_URL}/api/review/${id}/writer`).then(
-        (res) => res.json()
-      );
-
-      setReviews([...response.writedReviews]);
-    } else if (status === t.print("ReceivedReview")) {
-      const response = await fetch(`${API_URL}/api/review/${id}/receiver`).then(
-        (res) => res.json()
-      );
-
-      setReviews([...response.receivedReviews]);
-    } else if (status === t.print("NotWrittenReview")) {
-      const response = await fetch(`${API_URL}/api/review/${id}/buyer`).then(
-        (res) => res.json()
-      );
-      setIsSeller(false);
-      setReviews([...response.productList]);
-    } else {
-      const response = await fetch(`${API_URL}/api/review/${id}/seller`).then(
-        (res) => res.json()
-      );
-
-      setReviews([...response.productList]);
+    try {
+      if (status === t.print("WrittenReview")) {
+        const response = await fetch(`${API_URL}/api/review/${id}/writer`).then(
+          (res) => res.json()
+        );
+        setReviewLength(response.writedReviews.length);
+        setReviews([...response.writedReviews]);
+        console.log(response.writedReviews);
+      } else if (status === t.print("ReceivedReview")) {
+        const response = await fetch(
+          `${API_URL}/api/review/${id}/receiver`
+        ).then((res) => res.json());
+        setReviewLength(response.receivedReviews.length);
+        setReviews([...response.receivedReviews]);
+      } else if (status === t.print("NotWrittenReview")) {
+        const response = await fetch(`${API_URL}/api/review/${id}/buyer`).then(
+          (res) => res.json()
+        );
+        setIsSeller(false);
+        setReviewLength(response.productList.length);
+        setReviews([...response.productList]);
+      } else {
+        const response = await fetch(`${API_URL}/api/review/${id}/seller`).then(
+          (res) => res.json()
+        );
+        setReviewLength(response.productList.length);
+        setReviews([...response.productList]);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(true);
     }
-  }
+  };
 
   const setStatusFilter = (status) => {
     setStatus(status);
   };
 
-  useEffect(() => {
-    setIsReady(false);
-  }, [status]);
+  const formatData = (reviews, NUMCOLUMNS) => {
+    const totalRows = Math.floor(reviews.length / NUMCOLUMNS);
+    let totalLastRow = reviews.length - totalRows * NUMCOLUMNS;
+    while (totalLastRow !== 0 && totalLastRow !== NUMCOLUMNS) {
+      reviews.push({ key: "blank", empty: true });
+      totalLastRow++;
+    }
+    return reviews;
+  };
 
-  return isReady ? (
+  const checkReviewsEmpty = () => {
+    if (reviews.length) {
+      if (reviewsLength === 20) {
+        return (
+          <FlatList
+            keyExtractor={(reviews, index) => index.toString()}
+            data={formatData(reviews, NUMCOLUMNS)}
+            renderItem={({ item }) => (
+              <ReviewList
+                reviews={item}
+                navigation={navigation}
+                userNo={userNo}
+                isSeller={isSeller}
+                setIsLoading={setIsLoading}
+                isLoading={isLoading}
+              />
+            )}
+            // refreshControl={
+            //   <RefreshControl
+            //     refreshing={refreshing}
+            //     onRefresh={() => onRefresh()}
+            //   />
+            // }
+            // onEndReached={_handleLoadMore}
+            // onEndReachedThreshold={1}
+            // ListFooterComponent={renderLoader}
+          />
+        );
+      } else {
+        return (
+          <FlatList
+            keyExtractor={(reviews, index) => index.toString()}
+            data={formatData(reviews, NUMCOLUMNS)}
+            renderItem={({ item }) => (
+              <ReviewList
+                reviews={item}
+                navigation={navigation}
+                userNo={userNo}
+                isSeller={isSeller}
+                setIsLoading={setIsLoading}
+                isLoading={isLoading}
+              />
+            )}
+          />
+        );
+      }
+    } else {
+      return <Text>리뷰 목록이 없습니다.</Text>;
+    }
+  };
+
+  return (
     <Container>
       <ScrollHorizontalView>
-        <>{_handleCurrentBtn()}</>
+        <>{selectCurrentReviewList()}</>
       </ScrollHorizontalView>
 
       <ScrollView style={{ width: "100%" }}>
-        <ReviewList
-          navigation={navigation}
-          reviews={reviews}
-          userNo={userNo}
-          isSeller={isSeller}
-          setIsReady={setIsReady}
-        />
+        {isLoading ? (
+          <>{checkReviewsEmpty()}</>
+        ) : (
+          <ActivityIndicatorContainer color="#999999" />
+        )}
       </ScrollView>
     </Container>
-  ) : (
-    <AppLoading
-      startAsync={_setProductsByFetch}
-      onFinish={() => setIsReady(true)}
-      onError={console.warn}
-    />
   );
 };
 

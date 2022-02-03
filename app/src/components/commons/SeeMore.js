@@ -1,16 +1,23 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components/native";
-import { Text, View, Modal, TouchableOpacity, Alert } from "react-native";
+import {
+  Text,
+  View,
+  Modal,
+  TouchableOpacity,
+  Alert,
+  Pressable,
+} from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { API_URL } from "@env";
 
-import { ProgressContext, ReadyContext } from "../../contexts";
-import t from "../../utills/translate/Translator";
+import { ProgressContext } from "../../contexts";
+import t from "../../utils/translate/Translator";
 
 const ItemThreeDot = styled.TouchableOpacity`
   color: ${({ theme }) => theme.text};
   position: absolute;
-  top: 15px;
+  top: 10px;
   right: 20px;
   padding: 10px;
 `;
@@ -21,7 +28,7 @@ const UpdateBtn = styled.TouchableOpacity`
   height: 30px;
   position: absolute;
   right: 20px;
-  top: 45px;
+  top: 40px;
   background-color: ${({ theme }) => theme.background};
   border-color: ${({ theme }) => theme.label};
   justify-content: center;
@@ -37,7 +44,7 @@ const DeleteBtn = styled.TouchableOpacity`
 
   position: absolute;
   right: 20px;
-  top: 75px;
+  top: 70px;
   justify-content: center;
   align-items: center;
 `;
@@ -74,22 +81,58 @@ const SeeMore = ({
   setReplies,
   replyNo,
   comment,
+  userNo,
+  writerNo,
 }) => {
   const [isThreeDots, setIsThreeDots] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(true);
 
   const { spinner } = useContext(ProgressContext);
-  const { readyDispatch } = useContext(ReadyContext);
 
   const _toggleIsThreeDots = () => {
     setIsThreeDots((isThreeDots) => !isThreeDots);
   };
 
-  const _updateReply = () => {
+  const _updateReplyState = () => {
     setIsUpdateReply(true);
     setUpdateModalVisible(false);
+    setIsThreeDots(false);
     setReplyNo(replyNo);
+  };
+
+  const _updateCommentState = () => {
+    setIsUpdateComment(true);
+    setIsThreeDots(false);
+    setUpdateModalVisible(false);
+    setCommentNo(commentNo);
+  };
+
+  const _updateMarketState = () => {
+    navigation.navigate("MarketEditPage", {
+      updateProductNo: productNo,
+      isUpdate,
+    });
+    setUpdateModalVisible(false);
+  };
+
+  const _updateCommunityState = () => {
+    navigation.navigate("CommunityEditPage", {
+      updateCommunityNo: communityNo,
+      isUpdate,
+    });
+    setUpdateModalVisible(false);
+  };
+
+  const pressUpdateNoBtn = () => {
+    setIsThreeDots(false);
+    setUpdateModalVisible(false);
+  };
+
+  const pressDeleteNoBtn = () => {
+    setIsThreeDots(false);
+    setUpdateModalVisible(false);
   };
 
   const _deleteReply = async () => {
@@ -121,12 +164,6 @@ const SeeMore = ({
     }
   };
 
-  const _updateComment = () => {
-    setIsUpdateComment(true);
-    setUpdateModalVisible(false);
-    setCommentNo(commentNo);
-  };
-
   const _deleteComment = async () => {
     try {
       spinner.start();
@@ -155,12 +192,9 @@ const SeeMore = ({
     }
   };
 
-  const _deleteMarket = async () => {
+  const _deleteProduct = async () => {
     try {
       spinner.start();
-      // const id = await getItemFromAsync("id");
-      // setIsId(id);
-
       const config = {
         method: "DELETE",
         headers: {
@@ -175,7 +209,6 @@ const SeeMore = ({
       );
 
       setDeleteModalVisible(false);
-      readyDispatch.notReady();
       navigation.navigate("Main", {
         categoryNo: categoryNo,
         headerTitle: headerTitle,
@@ -206,7 +239,7 @@ const SeeMore = ({
       );
 
       setDeleteModalVisible(false);
-      readyDispatch.notReady();
+
       navigation.navigate("Main", {
         categoryNo: categoryNo,
         headerTitle: headerTitle,
@@ -219,17 +252,11 @@ const SeeMore = ({
     }
   };
 
-  let studentId = "123";
-  let id = "123";
-
   const divideBtn = () => {
     if (divide === "Market") {
       return (
         <>
-          {/* <UpdateBtn onPress={() => setUpdateModalVisible(true)}> */}
-          <UpdateBtn
-            onPress={() => Alert.alert(`${t.print("TheresNoFunctionYet")}`)}
-          >
+          <UpdateBtn onPress={() => setUpdateModalVisible(true)}>
             <Text>{t.print("ToEdit")}</Text>
             <Modal
               animationType="fade"
@@ -239,7 +266,15 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setUpdateModalVisible(false);
+                    setIsThreeDots(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -267,9 +302,7 @@ const SeeMore = ({
                     </Text>
                     <ModalTextContainer>
                       <Text style={{ color: "#666666" }}>
-                        {t.print(
-                          "PleaseEnterTheContentToBeEditedInTheCommentBox"
-                        )}
+                        게시글을 수정하시겠습니까?
                       </Text>
                     </ModalTextContainer>
                     <ModalRowContainer>
@@ -280,8 +313,9 @@ const SeeMore = ({
                           color: "#ffc352",
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
+                          padding: 5,
                         }}
-                        onPress={() => setUpdateModalVisible(false)}
+                        onPress={pressUpdateNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -291,8 +325,9 @@ const SeeMore = ({
                         style={{
                           width: 150,
                           alignItems: "center",
+                          padding: 5,
                         }}
-                        onPress={_updateComment}
+                        onPress={_updateMarketState}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("Yes")}
@@ -301,7 +336,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </UpdateBtn>
           <DeleteBtn onPress={() => setDeleteModalVisible(true)}>
@@ -314,7 +349,14 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setDeleteModalVisible(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -359,8 +401,9 @@ const SeeMore = ({
                           color: "#ffc352",
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
+                          padding: 5,
                         }}
-                        onPress={() => setDeleteModalVisible(false)}
+                        onPress={pressDeleteNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -370,8 +413,9 @@ const SeeMore = ({
                         style={{
                           width: 150,
                           alignItems: "center",
+                          padding: 5,
                         }}
-                        onPress={() => _deleteMarket()}
+                        onPress={() => _deleteProduct()}
                       >
                         <ModalTextContainer>
                           <Text
@@ -384,7 +428,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </DeleteBtn>
         </>
@@ -392,10 +436,7 @@ const SeeMore = ({
     } else if (divide === "Community") {
       return (
         <>
-          {/* <UpdateBtn onPress={() => setUpdateModalVisible(true)}> */}
-          <UpdateBtn
-            onPress={() => Alert.alert(`${t.print("TheresNoFunctionYet")}`)}
-          >
+          <UpdateBtn onPress={() => setUpdateModalVisible(true)}>
             <Text>{t.print("ToEdit")}</Text>
             <Modal
               animationType="fade"
@@ -405,7 +446,15 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setUpdateModalVisible(false);
+                    setIsThreeDots(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -432,9 +481,7 @@ const SeeMore = ({
                     </Text>
                     <ModalTextContainer>
                       <Text style={{ color: "#666666" }}>
-                        {t.print(
-                          "PleaseEnterTheContentToBeEditedInTheCommentBox"
-                        )}
+                        게시글을 수정하시겠습니까?
                       </Text>
                     </ModalTextContainer>
                     <ModalRowContainer>
@@ -445,8 +492,9 @@ const SeeMore = ({
                           color: "#ffc352",
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
+                          padding: 5,
                         }}
-                        onPress={() => setUpdateModalVisible(false)}
+                        onPress={pressUpdateNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -456,8 +504,9 @@ const SeeMore = ({
                         style={{
                           width: 150,
                           alignItems: "center",
+                          padding: 5,
                         }}
-                        onPress={_updateComment}
+                        onPress={_updateCommunityState}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("Yes")}
@@ -466,7 +515,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </UpdateBtn>
           <DeleteBtn onPress={() => setDeleteModalVisible(true)}>
@@ -479,7 +528,14 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setDeleteModalVisible(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -525,7 +581,7 @@ const SeeMore = ({
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
                         }}
-                        onPress={() => setDeleteModalVisible(false)}
+                        onPress={pressDeleteNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -545,7 +601,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </DeleteBtn>
         </>
@@ -564,7 +620,15 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setUpdateModalVisible(false);
+                    setIsThreeDots(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -575,8 +639,8 @@ const SeeMore = ({
                   <View
                     style={{
                       backgroundColor: "#ffffff",
-                      width: 320,
-                      height: 150,
+                      width: 280,
+                      height: 140,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
@@ -606,7 +670,7 @@ const SeeMore = ({
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
                         }}
-                        onPress={() => setUpdateModalVisible(false)}
+                        onPress={pressUpdateNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -617,7 +681,7 @@ const SeeMore = ({
                           width: 150,
                           alignItems: "center",
                         }}
-                        onPress={_updateComment}
+                        onPress={_updateCommentState}
                       >
                         <ModalTextContainer>
                           <Text
@@ -630,7 +694,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </UpdateBtn>
           <DeleteBtn onPress={() => setDeleteModalVisible(true)}>
@@ -643,7 +707,14 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setDeleteModalVisible(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -654,7 +725,7 @@ const SeeMore = ({
                   <View
                     style={{
                       backgroundColor: "#ffffff",
-                      width: 300,
+                      width: 280,
                       height: 160,
                       alignItems: "center",
                       justifyContent: "center",
@@ -675,9 +746,14 @@ const SeeMore = ({
                           color: "#666666",
                         }}
                       >
-                        {t.print(
-                          "AreYouSureYouWantToDeleteYourCommentAllIsDeletedAndCannotBeRecovered"
-                        )}
+                        댓글을 삭제하시겠습니까?
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#666666",
+                        }}
+                      >
+                        삭제하시면 복구하실 수 없습니다.
                       </Text>
                     </ModalTextContainer>
                     <ModalRowContainer>
@@ -689,7 +765,7 @@ const SeeMore = ({
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
                         }}
-                        onPress={() => setDeleteModalVisible(false)}
+                        onPress={pressDeleteNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -709,7 +785,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </DeleteBtn>
         </>
@@ -727,7 +803,15 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setUpdateModalVisible(false);
+                    setIsThreeDots(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -769,7 +853,7 @@ const SeeMore = ({
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
                         }}
-                        onPress={() => setUpdateModalVisible(false)}
+                        onPress={pressUpdateNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -780,7 +864,7 @@ const SeeMore = ({
                           width: 150,
                           alignItems: "center",
                         }}
-                        onPress={_updateReply}
+                        onPress={_updateReplyState}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("Yes")}
@@ -789,7 +873,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </UpdateBtn>
           <DeleteBtn onPress={() => setDeleteModalVisible(true)}>
@@ -802,7 +886,15 @@ const SeeMore = ({
               backdropColor="black"
               hasBackdrop={true}
             >
-              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}>
+              <Pressable
+                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.2)" }}
+                onPress={(event) => {
+                  if (event.target == event.currentTarget) {
+                    setDeleteModalVisible(false);
+                    setIsThreeDots(false);
+                  }
+                }}
+              >
                 <View
                   style={{
                     flex: 1,
@@ -832,14 +924,16 @@ const SeeMore = ({
                       <Text
                         style={{
                           color: "#666666",
-                          paddingBottom: 20,
-                          paddingLeft: 20,
-                          paddingRight: 20,
                         }}
                       >
-                        {t.print(
-                          "AreYouSureYouWantToDeleteThePostAllOfTheAboveWillBeDeletedAndCannotBeRecovered"
-                        )}
+                        답글을 삭제하시겠습니까?
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#666666",
+                        }}
+                      >
+                        삭제하시면 복구하실 수 없습니다.
                       </Text>
                     </ModalTextContainer>
                     <ModalRowContainer>
@@ -851,7 +945,7 @@ const SeeMore = ({
                           borderRightWidth: 1,
                           borderRightColor: "#c9c9c9",
                         }}
-                        onPress={() => setDeleteModalVisible(false)}
+                        onPress={pressDeleteNoBtn}
                       >
                         <Text style={{ fontWeight: "bold", color: "#ffc352" }}>
                           {t.print("No")}
@@ -871,7 +965,7 @@ const SeeMore = ({
                     </ModalRowContainer>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             </Modal>
           </DeleteBtn>
         </>
@@ -880,7 +974,7 @@ const SeeMore = ({
   };
 
   const _discriminateId = () => {
-    if (studentId === id) {
+    if (Number(userNo) === writerNo) {
       return <>{divideBtn()}</>;
     } else {
       return (

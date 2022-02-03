@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import styled, { ThemeContext } from "styled-components/native";
+import styled from "styled-components/native";
 import { Alert } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { Input, Button } from "../index";
 import Agree from "./Agree";
@@ -9,17 +10,17 @@ import {
   removeWhitespace,
   checkNickname,
   checkPassword,
-} from "../../utills/common";
+} from "../../utils/common";
 import { ProgressContext } from "../../contexts";
 import { API_URL } from "@env";
-import { auth } from "../../utills/firebase";
+import { auth } from "../../utils/firebase";
 const Container = styled.SafeAreaView`
   flex: 1;
   justify-content: flex-start;
   align-items: center;
   background-color: ${({ theme }) => theme.background};
   width: 100%;
-  padding-top: 20px;
+  margin-top: 30px;
 `;
 
 const ErrorText = styled.Text`
@@ -32,12 +33,7 @@ const ErrorText = styled.Text`
   color: ${({ theme }) => theme.errorText};
 `;
 
-const Icon = styled.TouchableOpacity`
-  padding: 0 20px 0 20px;
-`;
-
 const SignUp = ({ navigation, name, selectedFilterData }) => {
-  const theme = useContext(ThemeContext);
   const { spinner } = useContext(ProgressContext);
 
   const [email, setEmail] = useState("");
@@ -64,13 +60,18 @@ const SignUp = ({ navigation, name, selectedFilterData }) => {
 
   const _handleSignUpSucess = async () => {
     //회원가입 fetch 추가
-    const { selectedRegion, selectedSchool, selectedMajor } =
-      selectedFilterData;
+    const {
+      selectedRegion,
+      selectedSchool,
+      selectedMajor,
+      selectedDepartment,
+    } = selectedFilterData;
 
     const request = {
       regionNum: selectedRegion.value,
       schoolNum: selectedSchool.value,
       majorNum: selectedMajor.value,
+      departmentNum: selectedDepartment.value,
       email,
       name,
       nickname,
@@ -79,7 +80,7 @@ const SignUp = ({ navigation, name, selectedFilterData }) => {
 
     try {
       spinner.start();
-      const response = await fetch(`${API_URL}/api/user/signup/email`, {
+      const response = await fetch(`${API_URL}/api/user/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json; charset=utf-8",
@@ -117,12 +118,8 @@ const SignUp = ({ navigation, name, selectedFilterData }) => {
       spinner.stop();
     }
   };
-  // 박우림
-  // abcdefg@gmail.com
-  // abcd1234!
-  // 우리밋
+
   useEffect(() => {
-    // 오류메시지가 바로뜨는걸 막는다.
     if (didmountRef.current) {
       let _emailErrorMessage = "";
       let _passwordMessage = "";
@@ -153,7 +150,6 @@ const SignUp = ({ navigation, name, selectedFilterData }) => {
   }, [email, password, passwordConfirm, nickname]);
 
   const _handleEmailChange = (email) => {
-    //공백제거 형식체크
     const changedEmail = removeWhitespace(email);
     setEmail(changedEmail);
     setErrorEmailMessage(
@@ -226,56 +222,62 @@ const SignUp = ({ navigation, name, selectedFilterData }) => {
   // ]);
 
   return (
-    <Container>
-      <Input
-        label="이메일"
-        value={email}
-        onChangeText={_handleEmailChange}
-        onSubmitEditing={() => {}}
-        placeholder="email@naver.com"
-        returnKeyType="next"
-      />
-      <ErrorText>{errorEmailMessage}</ErrorText>
-      <Input
-        ref={passwordRef}
-        label="비밀번호"
-        value={password}
-        onChangeText={_handlePasswordChange}
-        onSubmitEditing={() => {}}
-        placeholder="비밀번호"
-        returnKeyType="next"
-        isPassword
-      />
-      <ErrorText>{errorPasswordMessage}</ErrorText>
-      <Input
-        ref={passwordConfirmRef}
-        label="비밀번호 확인"
-        value={passwordConfirm}
-        onChangeText={_handlePasswordConfirmChange}
-        onSubmitEditing={() => {}}
-        placeholder="비밀번호 확인"
-        returnKeyType="next"
-        isPassword
-      />
-      <ErrorText>{errorPasswordConfirmMessage}</ErrorText>
-      <Input
-        ref={nicknameRef}
-        label="닉네임"
-        value={nickname}
-        onChangeText={_handleNicknameChange}
-        onSubmitEditing={() => {}}
-        placeholder="닉네임"
-        returnKeyType="done"
-      />
-      <ErrorText>{errorNicknameMessage}</ErrorText>
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flex: 1 }}
+      extraScrollHeight={20}
+    >
+      <Container>
+        <Input
+          label="이메일"
+          value={email}
+          onChangeText={_handleEmailChange}
+          onSubmitEditing={() => {}}
+          placeholder="email@naver.com"
+          returnKeyType="next"
+          keyboardType="email-address"
+        />
+        <ErrorText>{errorEmailMessage}</ErrorText>
+        <Input
+          ref={passwordRef}
+          label="비밀번호"
+          value={password}
+          onChangeText={_handlePasswordChange}
+          onSubmitEditing={() => {}}
+          placeholder="비밀번호"
+          returnKeyType="next"
+          isPassword
+        />
+        <ErrorText>{errorPasswordMessage}</ErrorText>
+        <Input
+          ref={passwordConfirmRef}
+          label="비밀번호 확인"
+          value={passwordConfirm}
+          onChangeText={_handlePasswordConfirmChange}
+          onSubmitEditing={() => {}}
+          placeholder="비밀번호 확인"
+          returnKeyType="next"
+          isPassword
+        />
+        <ErrorText>{errorPasswordConfirmMessage}</ErrorText>
+        <Input
+          ref={nicknameRef}
+          label="닉네임"
+          value={nickname}
+          onChangeText={_handleNicknameChange}
+          onSubmitEditing={() => {}}
+          placeholder="닉네임"
+          returnKeyType="done"
+        />
+        <ErrorText>{errorNicknameMessage}</ErrorText>
 
-      <Agree isAgree={(isAgree) => setIsAgree(isAgree)}></Agree>
-      <Button
-        title="회원가입"
-        onPress={_handleSignUpSucess}
-        disabled={disabled}
-      />
-    </Container>
+        <Agree isAgree={(isAgree) => setIsAgree(isAgree)}></Agree>
+        <Button
+          title="회원가입"
+          onPress={_handleSignUpSucess}
+          disabled={disabled}
+        />
+      </Container>
+    </KeyboardAwareScrollView>
   );
 };
 

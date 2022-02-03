@@ -1,8 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components/native";
-import { Text, Alert } from "react-native";
-import AppLoding from "expo-app-loading";
-import { API_URL } from "@env";
 
 import Header from "../../components/commons/Header";
 import CommunitySearchResult from "../../components/searchs/CommunitySearchResult";
@@ -18,7 +15,7 @@ const CommunitySearchResultPage = ({ navigation, route }) => {
   return (
     <Container>
       <Header
-        moveViewByNavigation={() => navigation.goBack()}
+        moveViewByNavigation={() => navigation.replace("CommunitySearchPage")}
         title={headerTitle}
       />
       <CommunitySearchResult

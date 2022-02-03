@@ -1,10 +1,7 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import styled from "styled-components/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Alert } from "react-native";
-
-import t from "../../utills/translate/Translator";
-
 const Container = styled.TouchableOpacity`
   padding: 10px;
 
@@ -16,7 +13,7 @@ const Container = styled.TouchableOpacity`
 const AlertIcon = ({ navigation }) => {
   const _handleAlertListPage = () => {
     // navigation.navigate("Alert");
-    Alert.alert(`${t.print("TheresNoFunctionYet")}`);
+    Alert.alert("아직 기능이 준비되지 않았습니다");
   };
 
   return (

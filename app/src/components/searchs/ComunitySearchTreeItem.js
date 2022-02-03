@@ -1,10 +1,8 @@
-import React, { useContext, useState } from "react";
-import styled, { ThemeContext } from "styled-components/native";
-
+import React, { useContext } from "react";
+import styled from "styled-components/native";
 import { Image, StyleSheet } from "react-native";
 
-import t from "../../utills/translate/Translator";
-import { ReadyContext, readyDispatch } from "../../contexts";
+import t from "../../utils/translate/Translator";
 
 const CommunityContainer = styled.TouchableOpacity`
   flex: 1;
@@ -106,7 +104,6 @@ const CommunityHit = styled.Text`
 `;
 
 const ComunitySearchTreeItem = React.memo(
-  // 같은내용이 리렌더링되는것을 막아준다.
   ({
     navigation,
     categoryNo,
@@ -122,16 +119,15 @@ const ComunitySearchTreeItem = React.memo(
     no,
     profileUrl,
   }) => {
-    const { readyDispatch } = useContext(ReadyContext);
-
     const _handleDetailViewPress = () => {
-      readyDispatch.notReady();
       navigation.navigate("DetailViewPage", {
         categoryNo,
         communityNo: no,
-        // headerTitle,
+        headerTitle,
       });
     };
+
+    console.log(commentCnt, "a", likeCnt);
 
     const showimage = () => {
       if (thumbnail.length) {

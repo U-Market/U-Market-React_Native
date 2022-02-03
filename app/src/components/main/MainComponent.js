@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components/native";
 import {
   Dimensions,
@@ -6,17 +6,30 @@ import {
   Text,
   TouchableOpacity,
   View,
-  TextInput,
   ScrollView,
   Image,
+  Platform,
+  RefreshControl,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import Constants from "expo-constants";
+import { API_URL } from "@env";
+import * as Notifications from "expo-notifications";
 
+import { getItemFromAsync } from "../../utils/AsyncStorage";
 import Today from "./todays/Today";
 import Price from "./prices/Price";
 import SawProduct from "./sawProducts/SawProduct";
 import AlertIcon from "../alert/AlertIcon";
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -72,9 +85,25 @@ const MainHeaderTitle = styled.View`
   margin-left: 15px;
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background};
+`;
+
+const wait = (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+};
+
 const MainComponent = ({ navigation }) => {
   const [status, setStatus] = useState("TODAY");
-  const [search, setSearch] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
   const setStatusFilter = (status) => {
     setStatus(status);
@@ -120,12 +149,131 @@ const MainComponent = ({ navigation }) => {
     // }
   }
 
-  const _handelMarketSelectPage = () => {
+  const moveMarketSelectPage = () => {
     navigation.navigate("MarketSearchPage");
   };
 
-  return (
-    <ScrollView style={{ flex: 1, width: "100%" }}>
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+    if (Constants.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("푸시 알림을 위한 푸시 토큰을 가져오지 못했습니다!");
+        return;
+      }
+
+      token = (await Notifications.getDevicePushTokenAsync()).data;
+    } else {
+      alert("푸시 알림에는 물리적 장치를 사용해야 합니다");
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+    try {
+      const userNo = await getItemFromAsync("userNo");
+
+      const config = {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      };
+
+      const tokenGetResponse = await fetch(
+        `${API_URL}/api/notification/token/${Number(userNo)}`,
+        config
+      ).then((res) => res.json());
+
+      if (!tokenGetResponse.msg) {
+        if (tokenGetResponse[0].token) {
+          const config = {
+            method: "PATCH",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              token: token,
+            }),
+          };
+          const tokenPatchResponse = await fetch(
+            `${API_URL}/api/notification/token/${Number(userNo)}`,
+            config
+          ).then((res) => res.json());
+        }
+      } else {
+        const config = {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: token,
+          }),
+        };
+        const tokenPostResponse = await fetch(
+          `${API_URL}/api/notification/token/${Number(userNo)}`,
+          config
+        ).then((res) => res.json());
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsReady(true);
+    }
+
+    return token;
+  }
+
+  const onRefresh = React.useCallback(() => {
+    setIsReady(false);
+    wait(2000).then(() => setIsReady(true));
+  }, []);
+
+  return isReady ? (
+    <ScrollView
+      style={{ flex: 1, width: "100%" }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Container>
         <MainTop>
           <HeaderContainer>
@@ -137,7 +285,7 @@ const MainComponent = ({ navigation }) => {
             </MainHeaderTitle>
             <AlertIcon navigation={navigation}></AlertIcon>
           </HeaderContainer>
-          <SearchContainer onPress={_handelMarketSelectPage}>
+          <SearchContainer onPress={moveMarketSelectPage}>
             <SearchInput>
               <SearchTitle>{t.print("searchComment")}</SearchTitle>
             </SearchInput>
@@ -152,6 +300,8 @@ const MainComponent = ({ navigation }) => {
         {SeeMainTab()}
       </Container>
     </ScrollView>
+  ) : (
+    <ActivityIndicatorContainer color="#999999" />
   );
 };
 

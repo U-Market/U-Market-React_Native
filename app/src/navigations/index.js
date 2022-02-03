@@ -1,19 +1,41 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
+
 import { Spinner } from "../components";
-import { ProgressContext } from "../contexts";
+import { ProgressContext, StudentContext } from "../contexts";
 import MainStack from "./MainStack";
+import AuthStack from "./AuthStack";
+import { getItemFromAsync } from "../utils/AsyncStorage";
 
 const Navigation = () => {
+  const [userNo, setUserNo] = useState("");
   const { inProgress } = useContext(ProgressContext);
+  const { student } = useContext(StudentContext);
 
-  return (
-    <NavigationContainer>
-      <MainStack />
-      {inProgress && <Spinner />}
-    </NavigationContainer>
-    //inporgress 가 초깃값이 false이므로 spinner컴포넌트가 초기에 나타나지 않는다.
-  );
+  useEffect(() => {
+    checkUserNo();
+  }, [student]);
+
+  const checkUserNo = async () => {
+    const id = await getItemFromAsync("userNo");
+    setUserNo(id);
+  };
+
+  if (userNo === null) {
+    return (
+      <NavigationContainer>
+        {student?.email ? <MainStack /> : <AuthStack />}
+        {inProgress && <Spinner />}
+      </NavigationContainer>
+    );
+  } else {
+    return (
+      <NavigationContainer>
+        <MainStack />
+        {inProgress && <Spinner />}
+      </NavigationContainer>
+    );
+  }
 };
 
 export default Navigation;

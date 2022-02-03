@@ -1,13 +1,13 @@
-import React, { useLayoutEffect, useState, useContext, useEffect } from "react";
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import styled from "styled-components/native";
-import { Alert, Text, Image } from "react-native";
-import { auth, db } from "../../utills/firebase";
-import AppLoding from "expo-app-loading";
+import { Image } from "react-native";
+import { db } from "../../utils/firebase";
+
 import TimeAgo from "react-native-timeago";
+import { API_URL } from "@env";
+import t from "../../utils/translate/Translator";
 
-import t from "../../utills/translate/Translator";
-
-let moment = require("moment"); //load moment module to set local language
+let moment = require("moment");
 
 const Container = styled.TouchableOpacity`
   flex-direction: row;
@@ -31,15 +31,9 @@ const TextContainer = styled.View`
   padding-left: 5px;
 `;
 
-// const TextRowContainer = styled.View`
-//   flex-direction: row;
-//   padding-left: 5px;
-// `;
-
 const Title = styled.Text`
   font-size: 15px;
   font-weight: bold;
-  /* margin-bottom: 5px; */
 `;
 
 const Content = styled.Text`
@@ -51,19 +45,6 @@ const Content = styled.Text`
 const InDate = styled.Text`
   color: #979797;
   font-size: 11px;
-  /* align-self: flex-end;
-  padding-left: 5px;
-  padding-bottom: 5px; */
-`;
-
-const ChatCount = styled.View`
-  background-color: ${({ theme }) => theme.errorText};
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
 `;
 
 const Thumbnail = styled.View`
@@ -74,17 +55,43 @@ const Thumbnail = styled.View`
 
 const ChatList = ({ navigation, chatList }) => {
   const [messages, setMessages] = useState([]);
-  const [isReady, setIsReady] = useState(false);
+  const [chatListToken, setChatListToken] = useState("");
 
-  const _handleDetailPage = () => {
+  const moveChatRoomPage = () => {
     navigation.navigate("ChatScreenPage", {
       sellerNo: chatList.userNo,
       profileUrl: chatList.profileUrl,
       nickname: chatList.nickname,
       title: chatList.title,
       chatRoom: chatList.chatRoomNo,
+      chatListToken: chatListToken,
     });
   };
+
+  const getToken = async () => {
+    try {
+      const config = {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      };
+
+      const response = await fetch(
+        `${API_URL}/api/notification/token/${chatList.userNo}`,
+        config
+      ).then((res) => res.json());
+
+      setChatListToken(response[0].token);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getToken();
+  }, []);
 
   useLayoutEffect(() => {
     if (t.getLanguage() === "ko") {
@@ -114,7 +121,7 @@ const ChatList = ({ navigation, chatList }) => {
 
   if (messages.length) {
     return (
-      <Container onPress={_handleDetailPage}>
+      <Container onPress={moveChatRoomPage}>
         <Icon>
           <Image
             style={{

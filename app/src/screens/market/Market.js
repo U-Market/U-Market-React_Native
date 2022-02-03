@@ -1,11 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import styled from "styled-components/native";
-import { Text, Alert } from "react-native";
 import FAB from "react-native-fab";
 import { MaterialIcons } from "@expo/vector-icons";
 
-import { ReadyContext } from "../../contexts";
-import MarketComponent from "../../components/markets/MarketComponent";
+import MarketComponent from "../../components/markets/mains/MarketComponent";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -17,15 +15,9 @@ const Container = styled.SafeAreaView`
 `;
 
 const Market = ({ navigation }) => {
-  const { readyDispatch } = useContext(ReadyContext);
-
   const _handleWritePress = (params) => {
     navigation.navigate("MarketWritePage");
   };
-
-  useEffect(() => {
-    readyDispatch.notReady();
-  }, []);
 
   return (
     <Container>

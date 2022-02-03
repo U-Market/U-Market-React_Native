@@ -1,15 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components/native";
-import { Text, Alert, View } from "react-native";
-import AppLoading from "expo-app-loading";
+import { Alert, ScrollView } from "react-native";
+
 import { API_URL } from "@env";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { FlatList } from "react-native-gesture-handler";
 
-import { getItemFromAsync, setItemToAsync } from "../../utills/AsyncStorage";
-import t from "../../utills/translate/Translator";
+import { getItemFromAsync, setItemToAsync } from "../../utils/AsyncStorage";
+import t from "../../utils/translate/Translator";
 import RecentSearchList from "./RecentSearchList";
-import { ProgressContext } from "../../contexts";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -40,15 +38,14 @@ const SearchInput = styled.TextInput.attrs({
 
 const Icon = styled.TouchableOpacity`
   position: absolute;
-  right: 25px;
+  right: 15px;
+  padding: 10px;
 `;
 const RecentSearchContainer = styled.View`
   width: 100%;
   align-items: flex-start;
   justify-content: flex-start;
   margin-top: 15px;
-  /* border-bottom-width: 1px; */
-
   padding: 10px 0px 10px 15px;
   border-color: ${({ theme }) => theme.listBorder};
 `;
@@ -58,27 +55,34 @@ const RecentTitle = styled.Text`
   font-weight: bold;
 `;
 
+const ActivityIndicatorContainer = styled.ActivityIndicator`
+  flex: 1;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.background2};
+`;
+
 function MarketSearch({ navigation }) {
-  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState(false);
   const [searchList, setSearchList] = useState([]);
 
-  const { spinner } = useContext(ProgressContext);
+  useEffect(() => {
+    _loadSearchList();
+  }, [isLoading]);
 
   const _loadSearchList = async () => {
     try {
-      spinner.start();
       const asyncStorageSearchList = await getItemFromAsync("Search");
       if (asyncStorageSearchList !== null)
         setSearchList(JSON.parse(asyncStorageSearchList).list);
     } catch (err) {
       console.error(err);
     } finally {
-      spinner.stop();
+      setIsLoading(true);
     }
   };
 
-  const _handleSearchPress = async () => {
+  const pressSearchBtn = async () => {
     if (search.length < 2) {
       Alert.alert("2자 이하는 검색 할 수 없습니다.");
     } else {
@@ -99,10 +103,10 @@ function MarketSearch({ navigation }) {
             headers: { "Content-Type": "application/json; charset=utf-8" },
           }
         ).then((res) => res.json());
-        navigation.navigate("MarketCategoryPage", {
+        navigation.navigate("MarketSearchResultPage", {
           searchList: response.products,
           categoryNo: 15,
-          headerTitle: t.print("ProductSearch"),
+          headerTitle: `${search}`,
         });
       } catch (err) {
         console.error(err);
@@ -116,7 +120,7 @@ function MarketSearch({ navigation }) {
     });
 
     const Items = objectSearchList.map((product) => {
-      const moveSelectPage = async () => {
+      const moveRecentSearchResultPage = async () => {
         const response = await fetch(
           `${API_URL}/api/search/products?query=${product.result}`,
           {
@@ -124,7 +128,7 @@ function MarketSearch({ navigation }) {
             headers: { "Content-Type": "application/json; charset=utf-8" },
           }
         ).then((res) => res.json());
-        navigation.navigate("MarketCategoryPage", {
+        navigation.navigate("MarketSearchResultPage", {
           searchList: response.products,
           categoryNo: 15,
           headerTitle: product.result,
@@ -143,11 +147,12 @@ function MarketSearch({ navigation }) {
           })
         );
       };
+
       if (product.result) {
         return (
           <RecentSearchList
             key={product.result}
-            onPress={moveSelectPage}
+            onPress={moveRecentSearchResultPage}
             product={product.result}
             deleteSearchListBtn={deleteSearchListBtn}
           />
@@ -159,30 +164,30 @@ function MarketSearch({ navigation }) {
     return Items;
   };
 
-  return isReady ? (
-    <Container>
-      <SearchContainer>
-        <SearchInput
-          onChangeText={(search) => {
-            setSearch(search.replace(/ /g, "+"));
-          }}
-          placeholder={t.print("WhatAreYouLookingFor")}
-        />
-        <Icon onPress={_handleSearchPress}>
-          <FontAwesome5 name="search" size={20} color="#FFC352" />
-        </Icon>
-      </SearchContainer>
-      <RecentSearchContainer>
-        <RecentTitle>{t.print("RecentSearch")}</RecentTitle>
-      </RecentSearchContainer>
-      <>{showSearchList()}</>
-    </Container>
+  return isLoading ? (
+    <ScrollView scrollEnabled={false}>
+      <Container>
+        <SearchContainer>
+          <SearchInput
+            onChangeText={(search) => {
+              setSearch(search.replace(/ /g, "+"));
+            }}
+            placeholder={t.print("WhatAreYouLookingFor")}
+          />
+          <Icon onPress={pressSearchBtn}>
+            <FontAwesome5 name="search" size={20} color="#FFC352" />
+          </Icon>
+        </SearchContainer>
+        <RecentSearchContainer>
+          <RecentTitle>{t.print("RecentSearch")}</RecentTitle>
+        </RecentSearchContainer>
+        <ScrollView style={{ width: "100%" }}>
+          <>{showSearchList()}</>
+        </ScrollView>
+      </Container>
+    </ScrollView>
   ) : (
-    <AppLoading
-      startAsync={_loadSearchList}
-      onFinish={() => setIsReady(true)}
-      onError={console.error}
-    />
+    <ActivityIndicatorContainer color="#999999" />
   );
 }
 

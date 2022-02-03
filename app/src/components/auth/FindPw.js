@@ -1,12 +1,12 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Alert, Text } from "react-native";
-import styled, { ThemeContext } from "styled-components/native";
+import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 
 import { Input, Button } from "../index";
-import { ProgressContext } from "../../contexts";
-import { removeWhitespace, validateEmail } from "../../utills/common";
-import t from "../../utills/translate/Translator";
+
+import { removeWhitespace, validateEmail } from "../../utils/common";
+import t from "../../utils/translate/Translator";
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -49,8 +49,6 @@ function FindPw({ navigation }) {
   const didmountRef = useRef();
   const emailRef = useRef();
 
-  const { spinner } = useContext(ProgressContext);
-
   const _handleEmailChange = (email) => {
     setEmail(removeWhitespace(email));
   };
@@ -60,7 +58,6 @@ function FindPw({ navigation }) {
   };
 
   const _handleFindPwSucess = (json) => {
-    // setFindPw(json);
     Alert.alert(t.print("TemporaryPasswordWillBeSentToTheEmailYouEntered"));
   };
 

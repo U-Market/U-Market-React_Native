@@ -1,5 +1,5 @@
-import React, { useContext, useState, useEffect } from "react";
-import styled, { ThemeContext } from "styled-components/native";
+import React, { useContext } from "react";
+import styled from "styled-components/native";
 import { AntDesign } from "@expo/vector-icons";
 import { Alert, Text } from "react-native";
 
@@ -39,9 +39,7 @@ const LastCategory = styled.TouchableOpacity`
   margin-left: 30px;
 `;
 
-const ServiceCategory = ({ iconSize, navigation }) => {
-  const theme = useContext(ThemeContext);
-
+const ServiceCategory = ({ navigation }) => {
   const _handleTradeRelated = async () => {
     navigation.navigate("TradeRelatedPage");
   };

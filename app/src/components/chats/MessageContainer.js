@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
 import { View, Text } from "react-native";
 import {

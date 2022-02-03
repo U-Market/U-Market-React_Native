@@ -1,6 +1,6 @@
-import React, { useContext, useState, useEffect } from "react";
-import styled, { ThemeContext } from "styled-components/native";
-import { AntDesign } from "@expo/vector-icons";
+import React from "react";
+import styled from "styled-components/native";
+
 import { Alert, Text } from "react-native";
 
 const Container = styled.View`
@@ -40,9 +40,7 @@ const LastCategory = styled.TouchableOpacity`
 `;
 
 const Inquiry = ({ navigation }) => {
-  const theme = useContext(ThemeContext);
-
-  const _handleInquiryPost = async () => {
+  const postInquiry = async () => {
     navigation.navigate("InquiryPage");
   };
 
@@ -53,7 +51,7 @@ const Inquiry = ({ navigation }) => {
   return (
     <Container>
       <Title>1:1 문의</Title>
-      <Category onPress={_handleInquiryPost}>
+      <Category onPress={postInquiry}>
         <Text style={{ paddingLeft: 5, paddingRight: 260 }}>1:1문의 작성</Text>
       </Category>
 

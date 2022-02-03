@@ -1,12 +1,12 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import { StyleSheet, Image, View } from "react-native";
 import styled from "styled-components/native";
-// import { Rating, TapRating } from "react-native-elements";
+
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Stars from "react-native-stars";
 import { Button } from "../";
 
-import t from "../../utills/translate/Translator";
+import t from "../../utils/translate/Translator";
 
 const ProductInfoContainer = styled.SafeAreaView`
   width: 100%;
@@ -81,11 +81,11 @@ const StarTitle = styled.Text`
   font-weight: bold;
 `;
 
-const Description = styled.TextInput`
+const DescriptionInput = styled.TextInput`
   height: 300px;
   width: 90%;
+
   margin-top: 20px;
-  padding-left: 4px;
   background-color: ${({ theme }) => theme.background2};
   font-size: 16px;
   font-family: ROBOTO_REGULAR;
@@ -106,9 +106,8 @@ const ReviewWrite = ({
   onPress,
   rating,
   isSeller,
+  disabled,
 }) => {
-  const [disabled, setDisabled] = useState(true);
-
   return (
     <KeyboardAwareScrollView>
       <ProductInfoContainer>
@@ -157,26 +156,21 @@ const ReviewWrite = ({
           </View>
         </StarContainer>
 
-        <Description
+        <DescriptionInput
           multiline={true}
           onChangeText={(text) => setDescription(text)}
           placeholder={t.print("PleaseWriteItDown")}
           returnKeyType="done"
         />
-        <Button title={t.print("등록하기")} onPress={onPress} />
+
+        <Button
+          title={t.print("등록하기")}
+          onPress={onPress}
+          disabled={disabled}
+        />
       </Container>
     </KeyboardAwareScrollView>
   );
 };
 
 export default ReviewWrite;
-
-const styles = StyleSheet.create({
-  CheckBox: {
-    alignSelf: "center",
-    width: 15,
-    height: 15,
-    backgroundColor: "#222",
-    borderColor: "#e3e3e3",
-  },
-});

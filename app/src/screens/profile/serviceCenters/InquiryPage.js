@@ -5,7 +5,7 @@ import styled from "styled-components/native";
 import { ScrollView } from "react-native-gesture-handler";
 
 import Header from "../../../components/commons/Header";
-import Write from "../../../components/boards/writes/Write";
+import Write from "../../../components/communitys/boards/writes/Write";
 
 const PostBtn = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.mainOrange};

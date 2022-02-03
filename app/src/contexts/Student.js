@@ -9,8 +9,8 @@ const StudentContext = createContext({
 const StudentProvider = ({ children }) => {
   const [student, setStudent] = useState({});
 
-  const dispatch = ({ id }) => {
-    setStudent({ id });
+  const dispatch = ({ email }) => {
+    setStudent({ email });
   };
 
   const value = { student, dispatch };
